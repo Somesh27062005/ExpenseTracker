@@ -3,7 +3,7 @@
 A full-stack web application to track your expenses and income. Built with the MERN stack (MongoDB, Express, React, Node).
 Allows users to record expenses/income, view summary and balance, and manage transactions — all via a clean UI + REST API.
 
-✅ Features
+## ✅ Features
 
 👤 User authentication (signup / login)
 
@@ -23,7 +23,7 @@ Allows users to record expenses/income, view summary and balance, and manage tra
 
 (Add or remove features here depending on what your actual app supports: e.g. categories, filtering, charts, data export, etc.)
 
-🛠️ Tech Stack & Project Structure
+## 🛠️ Tech Stack & Project Structure
 
 Frontend: React (or whichever React setup you used — CRA / Vite / etc.)
 
@@ -35,7 +35,7 @@ ORM / ODM: Mongoose (or whichever library you used)
 
 Auth (if implemented): JSON Web Tokens (JWT) / sessions (depending on your code)
 
-📁 Suggested Project Structure
+## 📁 Suggested Project Structure
 
 expense-tracker/  
 ├── backend/       # Express + Node.js + MongoDB + API routes  

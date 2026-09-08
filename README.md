@@ -144,15 +144,4 @@ DELETE /api/v1/expense/:id         # Delete an expense transaction
 GET    /api/v1/expense/downloadexcel# Export expense transactions to Excel
 ```
 
----
 
-## 🤝 Contributing
-
-Contributions, issues, and feature requests are welcome!  
-Feel free to check the [Issues](https://github.com/Somesh27062005/ExpenseTracker/issues) page.
-
----
-
-## 📝 License
-
-This project is open-source and available under the [ISC License](LICENSE).

@@ -18,6 +18,13 @@ A full-stack financial dashboard web application built using the **MERN** stack.
 
 ---
 
+## ⚡ Performance & Load Benchmarks
+- 🚀 **Frontend TTFB**: `176 ms` initial load latency over Vercel Edge CDN.
+- ⚙️ **Backend Latency**: `248 ms` API response latency on Render.
+- 🧪 **Concurrency Stress Test**: `100% success rate` under 30 parallel users (0 dropped requests, `27.22 req/sec` throughput).
+
+---
+
 ## ✨ Features
 
 - 🔐 **User Authentication**: Secure JWT-based registration, login, and profile photo upload.

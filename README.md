@@ -13,7 +13,7 @@ A full-stack financial dashboard web application built using the **MERN** stack.
 
 ### 🌐 Live Demo & Deployment
 👉 **Live Frontend Application**: [https://somesh-expense-tracker.vercel.app/](https://somesh-expense-tracker.vercel.app/)  
-⚙️ **Production Backend API**: Hosted on [Render](https://render.com)  
+⚙️ **Production Backend API**: [https://expensetracker-4dxe.onrender.com](https://expensetracker-4dxe.onrender.com)  
 🗄️ **Database**: [MongoDB Atlas](https://www.mongodb.com/cloud/atlas)
 
 ---

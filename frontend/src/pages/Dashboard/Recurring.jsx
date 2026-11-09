@@ -121,7 +121,6 @@ const RecurringForm = ({ initialData, onSubmit, isSubmitting = false }) => {
 
             <EmojiPickerPopup
                 icon={form.icon}
-                variant={form.type}
                 onSelect={(selectedIcon) => handleChange("icon", selectedIcon)}
             />
 

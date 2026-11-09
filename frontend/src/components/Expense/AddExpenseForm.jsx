@@ -34,7 +34,6 @@ const AddExpenseForm = ({ onAddExpense, initialData = null, isSubmitting = false
         <form onSubmit={handleSubmit}>
             <EmojiPickerPopup
                 icon={expense.icon}
-                variant="expense"
                 onSelect={(selectedIcon) => handleChange("icon", selectedIcon)}
             />
 

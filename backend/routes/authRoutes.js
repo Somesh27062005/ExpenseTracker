@@ -5,6 +5,8 @@ const {
     registerUser,
     loginUser,
     getUserInfo,
+    updateUserProfile,
+    changePassword,
 }=require("../controllers/authControllers");
 const upload=require('../middleware/uploadMiddleware');
 
@@ -13,6 +15,8 @@ const router=express.Router();
 router.post("/register",registerUser);
 router.post("/login",loginUser);
 router.get("/getUser",protect,getUserInfo);
+router.put("/profile",protect,updateUserProfile);
+router.put("/change-password",protect,changePassword);
 
 router.post("/upload-image",upload.single("image"),(req,res) => {
     if(!req.file){

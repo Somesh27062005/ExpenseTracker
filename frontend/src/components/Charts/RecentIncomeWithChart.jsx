@@ -1,42 +1,40 @@
-import React, { useEffect,useState } from 'react'
+import React, { useContext, useMemo } from 'react';
 import CustomPieChart from './CustomPieChart';
+import { UserContext } from '../../context/UserContext';
+import { formatCurrency } from '../../utils/helper';
 
-const COLORS=["#875CF5","#FA2C37","#FF6900","#4f39f6"]
+const COLORS = ["#875CF5", "#FA2C37", "#FF6900", "#4f39f6", "#10b981"];
 
-const RecentIncomeWithChart = ({data,totalIncome}) => {
+const RecentIncomeWithChart = ({ data = [], totalIncome = 0 }) => {
+    const { user } = useContext(UserContext);
 
-    const [chartData,setChartData]=useState([]);
+    const chartData = useMemo(() => {
+        const grouped = new Map();
+        (data || []).forEach((item) => {
+            const key = item?.source || "Other";
+            grouped.set(key, (grouped.get(key) || 0) + Number(item?.amount || 0));
+        });
 
-    const prepareChartData = () => {
-        const dataArr=data?.map((item) => ({
-            name:item?.source,
-            amount:item?.amount,
-        }));
+        return Array.from(grouped.entries())
+            .map(([name, amount]) => ({ name, amount }))
+            .slice(0, 5);
+    }, [data]);
 
-        setChartData(dataArr);
-    };
+    return (
+        <div className="card">
+            <div className="flex items-center justify-between">
+                <h5 className="text-lg">Last 60 Days Income</h5>
+            </div>
 
-    useEffect(() => {
-        prepareChartData();
+            <CustomPieChart
+                data={chartData}
+                label="Total Income"
+                totalAmount={formatCurrency(totalIncome, user?.currency)}
+                showTextAnchor
+                colors={COLORS}
+            />
+        </div>
+    );
+};
 
-        return () => {};
-    },[data]);
-
-  return (
-    <div className='card'>
-      <div className='flex items-center justify-between'>
-        <h5 className='text-lg'>Last 60 Days Income</h5>
-      </div>
-
-        <CustomPieChart
-            data={chartData}
-            label="Total Income"
-            totalAmount={`$${totalIncome}`}
-            showTextAnchor
-            colors={COLORS}
-        />
-    </div>
-  )
-}
-
-export default RecentIncomeWithChart
+export default RecentIncomeWithChart;

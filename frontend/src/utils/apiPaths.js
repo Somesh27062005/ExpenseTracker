@@ -1,28 +1,44 @@
 export const BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
 
-//utils/apiPaths.js
-export const API_PATHS={
-    AUTH:{
-        LOGIN:"/api/v1/auth/login",
-        REGISTER:"/api/v1/auth/register",
-        GET_USER_INFO:"/api/v1/auth/getUser",
+// utils/apiPaths.js
+export const API_PATHS = {
+    AUTH: {
+        LOGIN: "/api/v1/auth/login",
+        REGISTER: "/api/v1/auth/register",
+        GET_USER_INFO: "/api/v1/auth/getUser",
+        UPDATE_PROFILE: "/api/v1/auth/profile",
+        CHANGE_PASSWORD: "/api/v1/auth/change-password",
     },
-    DASHBOARD:{
-        GET_DATA:"/api/v1/dashboard",
+    DASHBOARD: {
+        GET_DATA: "/api/v1/dashboard",
     },
-    INCOME:{
-        ADD_INCOME:"/api/v1/income/add",
-        GET_ALL_INCOME:"/api/v1/income/get",
-        DELETE_INCOME:(incomeId) => `/api/v1/income/${incomeId}`,
-        DOWNLOAD_INCOME:`/api/v1/income/downloadexcel`,
+    INCOME: {
+        ADD_INCOME: "/api/v1/income/add",
+        GET_ALL_INCOME: "/api/v1/income/get",
+        UPDATE_INCOME: (incomeId) => `/api/v1/income/${incomeId}`,
+        DELETE_INCOME: (incomeId) => `/api/v1/income/${incomeId}`,
+        DOWNLOAD_INCOME: "/api/v1/income/downloadexcel",
     },
-    EXPENSE:{
-        ADD_EXPENSE:"/api/v1/expense/add",
-        GET_ALL_EXPENSE:"/api/v1/expense/get",
-        DELETE_EXPENSE:(expenseId) => `/api/v1/expense/${expenseId}`,
-        DOWNLOAD_EXPENSE:`/api/v1/expense/downloadexcel`,
+    EXPENSE: {
+        ADD_EXPENSE: "/api/v1/expense/add",
+        GET_ALL_EXPENSE: "/api/v1/expense/get",
+        UPDATE_EXPENSE: (expenseId) => `/api/v1/expense/${expenseId}`,
+        DELETE_EXPENSE: (expenseId) => `/api/v1/expense/${expenseId}`,
+        DOWNLOAD_EXPENSE: "/api/v1/expense/downloadexcel",
     },
-    IMAGE:{
-        UPLOAD_IMAGE:"/api/v1/auth/upload-image",
+    BUDGETS: {
+        GET_BUDGETS: "/api/v1/budgets",
+        UPSERT_BUDGET: "/api/v1/budgets",
+        DELETE_BUDGET: (budgetId) => `/api/v1/budgets/${budgetId}`,
+    },
+    RECURRING: {
+        GET_ALL: "/api/v1/recurring",
+        ADD: "/api/v1/recurring",
+        SYNC: "/api/v1/recurring/sync",
+        UPDATE: (id) => `/api/v1/recurring/${id}`,
+        DELETE: (id) => `/api/v1/recurring/${id}`,
+    },
+    IMAGE: {
+        UPLOAD_IMAGE: "/api/v1/auth/upload-image",
     },
 };

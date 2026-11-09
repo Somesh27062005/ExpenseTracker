@@ -23,7 +23,7 @@
 }
 
 .btn-primary{
-    @apply w-full text-sm font-medium text-white bg-violet-500 shadow-lg shadow-purple-600/5 p-[10px] rounded-md my-1 hover:bg-purple-600/15 hover:text-purple-600;
+    @apply w-full flex items-center justify-center gap-2 text-sm font-medium text-white bg-violet-500 shadow-lg shadow-purple-600/5 p-[10px] rounded-md my-1 hover:bg-violet-600 cursor-pointer transition-colors disabled:opacity-60 disabled:cursor-not-allowed;
 }
 
 .card{
@@ -31,13 +31,13 @@
 }
 
 .card-btn{
-    @apply flex items-center gap-3 text-[12px] font-medium text-gray-700 hover:text-purple-500 bg-gray-50 hover:bg-purple-50 px-4 py-1.5 rounded-lg border border-gray-200/50 cursor-pointer;
+    @apply flex items-center gap-2 text-[12px] font-medium text-gray-700 hover:text-purple-600 bg-gray-50 hover:bg-purple-50 px-3.5 py-1.5 rounded-lg border border-gray-200/50 cursor-pointer transition-colors disabled:opacity-60 disabled:cursor-not-allowed;
 }
 
 .add-btn{
-    @apply flex items-center gap-1.5 text-xs md:text-sm font-medium text-purple-600 whitespace-nowrap bg-purple-50 border border-purple-100 rounded-full px-4 py-2 cursor-pointer;
+    @apply flex items-center justify-center gap-1.5 text-xs md:text-sm font-medium text-purple-600 whitespace-nowrap bg-purple-50 border border-purple-100 rounded-full px-4 py-2 cursor-pointer hover:bg-purple-100/70 transition-colors disabled:opacity-60 disabled:cursor-not-allowed;
 }
 
 .add-btn-fill{
-    @apply text-white bg-primary;
-};
+    @apply text-white bg-primary hover:bg-violet-600 border-primary;
+}

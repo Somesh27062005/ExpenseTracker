@@ -111,12 +111,9 @@ const EmojiPickerPopup = ({ icon, onSelect }) => {
                     <EmojiPicker
                         open={isOpen}
                         width="100%"
-                        height={380}
+                        height={320}
                         lazyLoadEmojis
-                        previewConfig={{
-                            showPreview: true,
-                            defaultCaption: "Hover an emoji to see its name",
-                        }}
+                        previewConfig={{ showPreview: false }}
                         onEmojiClick={(emoji) => {
                             onSelect(emoji?.imageUrl || emoji?.emoji || "");
                             setIsOpen(false);

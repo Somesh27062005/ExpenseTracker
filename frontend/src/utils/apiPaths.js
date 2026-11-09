@@ -26,18 +26,6 @@ export const API_PATHS = {
         DELETE_EXPENSE: (expenseId) => `/api/v1/expense/${expenseId}`,
         DOWNLOAD_EXPENSE: "/api/v1/expense/downloadexcel",
     },
-    BUDGETS: {
-        GET_BUDGETS: "/api/v1/budgets",
-        UPSERT_BUDGET: "/api/v1/budgets",
-        DELETE_BUDGET: (budgetId) => `/api/v1/budgets/${budgetId}`,
-    },
-    RECURRING: {
-        GET_ALL: "/api/v1/recurring",
-        ADD: "/api/v1/recurring",
-        SYNC: "/api/v1/recurring/sync",
-        UPDATE: (id) => `/api/v1/recurring/${id}`,
-        DELETE: (id) => `/api/v1/recurring/${id}`,
-    },
     IMAGE: {
         UPLOAD_IMAGE: "/api/v1/auth/upload-image",
     },

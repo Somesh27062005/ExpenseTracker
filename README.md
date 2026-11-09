@@ -7,7 +7,7 @@
 ![TailwindCSS](https://img.shields.io/badge/TailwindCSS-4.0-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white)
 ![Vercel](https://img.shields.io/badge/Vercel-Deployed-000000?style=for-the-badge&logo=vercel&logoColor=white)
 
-A full-stack financial dashboard web application built using the **MERN** stack. Track income, expenses, monthly budgets, and recurring schedules, analyze 6-month cashflow trends with interactive charts, customize currencies, and export records directly to Excel.
+A full-stack financial dashboard web application built using the **MERN** stack. Track income and expenses, view real-time financial balance and 6-month cashflow trends with interactive charts, filter by month or category, customize currencies, and export records directly to Excel.
 
 ---
 
@@ -33,9 +33,7 @@ A full-stack financial dashboard web application built using the **MERN** stack.
 
 - 🔐 **User Authentication & Account Settings**: Secure JWT-based registration, login, profile photo upload, multi-currency selection (`USD`, `INR`, `EUR`, `GBP`), and password updates.
 - 📊 **Interactive Financial Dashboard**: Real-time all-time and current-month summaries (income, expenses, net savings, savings rate), quick-add modals, 6-month Income vs Expense chart, and monthly category breakdown.
-- 💰 **Full Transaction CRUD & Filtering**: Add, edit, view, search, sort, and filter Income and Expense records by source/category, payment method, notes, and custom date ranges.
-- 🎯 **Monthly Budgets & Spending Alerts**: Set monthly `"Overall"` or category-specific spending caps with live progress bars (`On Track`, `Near Limit`, `Exceeded`).
-- 🔁 **Recurring Transactions**: Schedule weekly, monthly, or yearly recurring income and expenses that automatically log when due, with pause/resume and manual sync controls.
+- 💰 **Full Income & Expense Management**: Add, edit, view, search, sort, and filter Income and Expense records by source/category, payment method, notes, month, or custom date ranges.
 - 📥 **Excel Data Export**: Export formatted income and expense spreadsheets (`.xlsx`) directly from memory.
 - 📱 **Responsive Dashboard UI**: Adaptive sidebar and mobile drawer built with React, Tailwind CSS, and Recharts.
 
@@ -58,9 +56,9 @@ A full-stack financial dashboard web application built using the **MERN** stack.
 ExpenseTracker/
 ├── backend/                  # Node.js + Express + MongoDB REST API
 │   ├── config/               # Database connection setup
-│   ├── controllers/          # Route logic (Auth, Dashboard, Income, Expense, Budgets, Recurring)
+│   ├── controllers/          # Route logic (Auth, Dashboard, Income, Expense)
 │   ├── middleware/           # JWT auth & file upload middleware
-│   ├── models/               # Mongoose schemas (User, Income, Expense, Budget, RecurringTransaction)
+│   ├── models/               # Mongoose schemas (User, Income, Expense)
 │   ├── routes/               # API endpoint routing definitions
 │   ├── uploads/              # Storage directory for user profile avatars
 │   ├── .env.example          # Template for backend environment variables
@@ -74,7 +72,7 @@ ExpenseTracker/
     │   ├── components/       # Reusable cards, charts, filters, modals & layout components
     │   ├── context/          # React User Context provider
     │   ├── hooks/            # Custom authentication & state hooks
-    │   ├── pages/            # Routes (Login, SignUp, Dashboard, Income, Expense, Budgets, Recurring, Settings)
+    │   ├── pages/            # Routes (Login, SignUp, Dashboard, Income, Expense, Settings)
     │   └── utils/            # Currency/date helpers, API paths & Axios instance
     ├── package.json          # Frontend dependencies
     └── vite.config.js        # Vite configuration
@@ -145,7 +143,7 @@ POST   /api/v1/auth/login           # Login user
 GET    /api/v1/auth/getUser         # Fetch logged-in user profile
 PUT    /api/v1/auth/profile         # Update profile, photo, or preferred currency
 PUT    /api/v1/auth/change-password # Update account password
-GET    /api/v1/dashboard            # Fetch consolidated analytics, budgets & sync status
+GET    /api/v1/dashboard            # Fetch consolidated analytics & monthly spending breakdown
 
 POST   /api/v1/income/add           # Add new income item
 GET    /api/v1/income/get           # Get income transactions (supports search/date/source filters)
@@ -158,14 +156,4 @@ GET    /api/v1/expense/get          # Get expense transactions (supports search/
 PUT    /api/v1/expense/:id          # Update an expense transaction
 DELETE /api/v1/expense/:id          # Delete an expense transaction
 GET    /api/v1/expense/downloadexcel# Export expense transactions to Excel
-
-GET    /api/v1/budgets              # Get monthly budget summary & spending breakdown
-POST   /api/v1/budgets              # Create or update a monthly budget limit
-DELETE /api/v1/budgets/:id          # Delete a budget limit
-
-GET    /api/v1/recurring            # Get recurring rules (auto-syncs due occurrences)
-POST   /api/v1/recurring            # Create a recurring income/expense schedule
-POST   /api/v1/recurring/sync       # Manually trigger due recurring transaction sync
-PUT    /api/v1/recurring/:id        # Update or pause/resume a recurring schedule
-DELETE /api/v1/recurring/:id        # Delete a recurring schedule
 ```

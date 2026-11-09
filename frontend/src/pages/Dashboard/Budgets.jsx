@@ -4,11 +4,16 @@ import { useUserAuth } from '../../hooks/useUserAuth';
 import axiosInstance from '../../utils/axiosInstance';
 import { API_PATHS } from '../../utils/apiPaths';
 import { UserContext } from '../../context/UserContext';
-import { formatCurrency, getCurrentMonthKey } from '../../utils/helper';
+import {
+    formatCurrency,
+    formatMonthLabel,
+    getCurrentMonthKey,
+} from '../../utils/helper';
 import { BUDGET_CATEGORY_SUGGESTIONS } from '../../utils/data';
 import Modal from '../../components/Modal';
 import DeleteAlert from '../../components/DeleteAlert';
 import Input from '../../components/Inputs/Input';
+import MonthPicker from '../../components/Inputs/MonthPicker';
 import toast from 'react-hot-toast';
 import {
     LuPlus,
@@ -34,6 +39,30 @@ const BudgetForm = ({ defaultMonth, initialData, onSubmit, isSubmitting = false 
 
     return (
         <form onSubmit={handleSubmit}>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4 items-start mb-1">
+                <div className="mb-4">
+                    <MonthPicker
+                        value={month}
+                        onChange={setMonth}
+                        label="Budget Month"
+                        showSteppers={false}
+                        align="left"
+                        disabled={isSubmitting}
+                    />
+                </div>
+
+                <Input
+                    value={limit}
+                    onChange={({ target }) => setLimit(target.value)}
+                    label="Monthly Spending Limit"
+                    placeholder="500"
+                    type="number"
+                    min="1"
+                    step="1"
+                    disabled={isSubmitting}
+                />
+            </div>
+
             <div className="mb-4">
                 <p className="text-xs text-gray-500 mb-2">Quick Categories</p>
                 <div className="flex flex-wrap gap-2">
@@ -64,27 +93,6 @@ const BudgetForm = ({ defaultMonth, initialData, onSubmit, isSubmitting = false 
                 disabled={isSubmitting}
             />
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4">
-                <Input
-                    value={limit}
-                    onChange={({ target }) => setLimit(target.value)}
-                    label="Monthly Limit"
-                    placeholder="500"
-                    type="number"
-                    min="1"
-                    step="1"
-                    disabled={isSubmitting}
-                />
-
-                <Input
-                    value={month}
-                    onChange={({ target }) => setMonth(target.value)}
-                    label="Month"
-                    type="month"
-                    disabled={isSubmitting}
-                />
-            </div>
-
             <div className="flex justify-end mt-6">
                 <button
                     type="submit"
@@ -95,7 +103,7 @@ const BudgetForm = ({ defaultMonth, initialData, onSubmit, isSubmitting = false 
                     <span>
                         {isSubmitting
                             ? "Saving..."
-                            : initialData
+                            : initialData?._id
                             ? "Update Budget"
                             : "Save Budget"}
                     </span>
@@ -116,6 +124,7 @@ const Budgets = () => {
         totalBudgeted: 0,
         totalMonthlySpent: 0,
         budgets: [],
+        categoryBreakdown: [],
     });
     const [loading, setLoading] = useState(false);
     const [submitting, setSubmitting] = useState(false);
@@ -194,8 +203,10 @@ const Budgets = () => {
     };
 
     const budgets = summary?.budgets || [];
+    const categoryBreakdown = summary?.categoryBreakdown || [];
     const alerts = budgets.filter((b) => b.status === "warning" || b.status === "exceeded");
     const totalRemaining = (summary.totalBudgeted || 0) - (summary.totalMonthlySpent || 0);
+    const formattedMonth = formatMonthLabel(selectedMonth);
 
     const getBarColor = (status) => {
         if (status === "exceeded") return "bg-red-500";
@@ -230,26 +241,30 @@ const Budgets = () => {
             <div className="my-5 mx-auto space-y-6">
                 {/* Header */}
                 <div className="card">
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
                         <div>
                             <h3 className="text-lg font-medium text-gray-900">
-                                Monthly Budgets & Alerts
+                                Monthly Budgets &amp; Spending Limits
                             </h3>
                             <p className="text-xs text-gray-400 mt-0.5">
-                                Set overall or category-level spending caps and monitor usage in real time.
+                                Choose a month to inspect expenses against your &quot;Overall&quot; or category spending caps.
                             </p>
                         </div>
 
-                        <div className="flex flex-wrap items-center gap-3">
-                            <input
-                                type="month"
-                                value={selectedMonth}
-                                onChange={(e) => setSelectedMonth(e.target.value)}
-                                className="bg-slate-50 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 outline-none cursor-pointer"
-                            />
+                        <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+                            <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+                                <span className="text-xs font-medium text-gray-500 whitespace-nowrap">
+                                    Budget Month:
+                                </span>
+                                <MonthPicker
+                                    value={selectedMonth}
+                                    onChange={setSelectedMonth}
+                                    align="right"
+                                />
+                            </div>
                             <button
                                 type="button"
-                                className="add-btn add-btn-fill"
+                                className="add-btn add-btn-fill self-start sm:self-auto"
                                 onClick={() => setFormModal({ show: true, data: null })}
                             >
                                 <LuPlus className="text-base" />
@@ -261,14 +276,18 @@ const Budgets = () => {
                     {/* Monthly Summary Row */}
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6 pt-5 border-t border-gray-100">
                         <div className="p-4 rounded-xl bg-purple-50/70 border border-purple-100">
-                            <p className="text-xs text-purple-700 font-medium">Total Budgeted</p>
+                            <p className="text-xs text-purple-700 font-medium">
+                                Budget Limit ({formattedMonth})
+                            </p>
                             <p className="text-xl font-semibold text-gray-900 mt-1">
                                 {formatCurrency(summary.totalBudgeted || 0, currency)}
                             </p>
                         </div>
 
                         <div className="p-4 rounded-xl bg-gray-50 border border-gray-200/60">
-                            <p className="text-xs text-gray-500 font-medium">Total Monthly Spent</p>
+                            <p className="text-xs text-gray-500 font-medium">
+                                Expenses in {formattedMonth}
+                            </p>
                             <p className="text-xl font-semibold text-gray-900 mt-1">
                                 {formatCurrency(summary.totalMonthlySpent || 0, currency)}
                             </p>
@@ -316,7 +335,7 @@ const Budgets = () => {
                 {loading && budgets.length === 0 ? (
                     <div className="card py-14 flex flex-col items-center justify-center gap-2 text-gray-500">
                         <LuLoaderCircle className="animate-spin text-2xl text-primary" />
-                        <p className="text-sm">Loading budgets for {selectedMonth}...</p>
+                        <p className="text-sm">Loading budgets for {formattedMonth}...</p>
                     </div>
                 ) : budgets.length === 0 ? (
                     <div className="card py-14 text-center">
@@ -324,10 +343,10 @@ const Budgets = () => {
                             <LuTarget className="text-2xl" />
                         </div>
                         <h4 className="text-base font-medium text-gray-800">
-                            No budgets set for {selectedMonth}
+                            No budgets set for {formattedMonth}
                         </h4>
                         <p className="text-xs text-gray-400 mt-1 max-w-md mx-auto">
-                            Create an &quot;Overall&quot; limit or category budgets like Food, Rent, and Groceries to stay on top of your monthly goals.
+                            Create an &quot;Overall&quot; limit or category budgets like Food, Rent, and Groceries to track spending for {formattedMonth}.
                         </p>
                         <button
                             type="button"
@@ -351,7 +370,7 @@ const Budgets = () => {
                                             {getStatusBadge(budget.status)}
                                         </div>
                                         <p className="text-xs text-gray-400 mt-0.5">
-                                            {budget.month}
+                                            {formatMonthLabel(budget.month)}
                                         </p>
                                     </div>
 
@@ -423,15 +442,76 @@ const Budgets = () => {
                         ))}
                     </div>
                 )}
+
+                {/* Monthly Category Spending Overview */}
+                {categoryBreakdown.length > 0 && (
+                    <div className="card">
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
+                            <div>
+                                <h4 className="text-base font-medium text-gray-900">
+                                    Expenses by Category — {formattedMonth}
+                                </h4>
+                                <p className="text-xs text-gray-400 mt-0.5">
+                                    Actual spending logged in {formattedMonth}. Click any category to set or adjust its cap.
+                                </p>
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                            {categoryBreakdown.map((item) => {
+                                const matchingBudget = budgets.find(
+                                    (b) =>
+                                        b.category.trim().toLowerCase() ===
+                                        String(item.name || "").trim().toLowerCase()
+                                );
+
+                                return (
+                                    <button
+                                        key={item.name}
+                                        type="button"
+                                        onClick={() =>
+                                            setFormModal({
+                                                show: true,
+                                                data: matchingBudget || {
+                                                    category: item.name,
+                                                    limit: "",
+                                                    month: selectedMonth,
+                                                },
+                                            })
+                                        }
+                                        className="flex items-center justify-between p-3.5 rounded-xl border border-gray-200/70 bg-gray-50/70 hover:bg-purple-50/60 hover:border-purple-200 transition-colors cursor-pointer text-left"
+                                    >
+                                        <div className="min-w-0 pr-2">
+                                            <p className="text-sm font-medium text-gray-800 truncate">
+                                                {item.name}
+                                            </p>
+                                            <p className="text-[11px] text-gray-400 mt-0.5">
+                                                {matchingBudget
+                                                    ? `Budgeted: ${formatCurrency(
+                                                          matchingBudget.limit,
+                                                          currency
+                                                      )}`
+                                                    : "No budget cap · Click to set"}
+                                            </p>
+                                        </div>
+                                        <span className="text-sm font-semibold text-gray-900 shrink-0">
+                                            {formatCurrency(item.amount, currency)}
+                                        </span>
+                                    </button>
+                                );
+                            })}
+                        </div>
+                    </div>
+                )}
             </div>
 
             <Modal
                 isOpen={formModal.show}
                 onClose={() => !submitting && setFormModal({ show: false, data: null })}
-                title={formModal.data ? "Edit Monthly Budget" : "Set Monthly Budget"}
+                title={formModal.data?._id ? "Edit Monthly Budget" : "Set Monthly Budget"}
             >
                 <BudgetForm
-                    key={formModal.data?._id || `new-budget-${selectedMonth}`}
+                    key={`${formModal.data?._id || formModal.data?.category || "new"}-${selectedMonth}`}
                     defaultMonth={selectedMonth}
                     initialData={formModal.data}
                     onSubmit={handleSaveBudget}

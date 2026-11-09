@@ -1,6 +1,16 @@
 import React from 'react';
 import { LuSearch, LuFilterX } from 'react-icons/lu';
 import { SORT_OPTIONS } from '../../utils/data';
+import MonthPicker from '../Inputs/MonthPicker';
+import { getCurrentMonthKey } from '../../utils/helper';
+
+const openDatePicker = (e) => {
+    try {
+        e.currentTarget.showPicker?.();
+    } catch {
+        // Ignore when browser restricts showPicker
+    }
+};
 
 const TransactionFilterBar = ({
     search = "",
@@ -11,6 +21,8 @@ const TransactionFilterBar = ({
     categoryLabel = "Category",
     dateRangePreset = "all",
     onDateRangePresetChange,
+    selectedMonth,
+    onSelectedMonthChange,
     startDate = "",
     onStartDateChange,
     endDate = "",
@@ -57,6 +69,7 @@ const TransactionFilterBar = ({
                 >
                     <option value="all">All Dates</option>
                     <option value="this_month">This Month</option>
+                    <option value="month">Filter by Month</option>
                     <option value="last_30">Last 30 Days</option>
                     <option value="custom">Custom Range</option>
                 </select>
@@ -89,6 +102,19 @@ const TransactionFilterBar = ({
                 </div>
             </div>
 
+            {dateRangePreset === "month" && onSelectedMonthChange && (
+                <div className="flex flex-col sm:flex-row sm:items-center gap-3 mt-3 pt-3 border-t border-gray-100">
+                    <span className="text-xs font-medium text-gray-500">
+                        Select Month:
+                    </span>
+                    <MonthPicker
+                        value={selectedMonth || getCurrentMonthKey()}
+                        onChange={onSelectedMonthChange}
+                        align="left"
+                    />
+                </div>
+            )}
+
             {dateRangePreset === "custom" && (
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-3 pt-3 border-t border-gray-100">
                     <div className="flex items-center gap-2">
@@ -97,7 +123,8 @@ const TransactionFilterBar = ({
                             type="date"
                             value={startDate}
                             onChange={(e) => onStartDateChange(e.target.value)}
-                            className="w-full bg-slate-50 border border-gray-200 rounded-lg px-3 py-1.5 text-sm text-gray-700 outline-none"
+                            onClick={openDatePicker}
+                            className="w-full bg-slate-50 border border-gray-200 rounded-lg px-3 py-1.5 text-sm text-gray-700 outline-none cursor-pointer"
                         />
                     </div>
                     <div className="flex items-center gap-2">
@@ -106,7 +133,8 @@ const TransactionFilterBar = ({
                             type="date"
                             value={endDate}
                             onChange={(e) => onEndDateChange(e.target.value)}
-                            className="w-full bg-slate-50 border border-gray-200 rounded-lg px-3 py-1.5 text-sm text-gray-700 outline-none"
+                            onClick={openDatePicker}
+                            className="w-full bg-slate-50 border border-gray-200 rounded-lg px-3 py-1.5 text-sm text-gray-700 outline-none cursor-pointer"
                         />
                     </div>
                 </div>

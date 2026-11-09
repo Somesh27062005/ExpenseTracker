@@ -2,8 +2,6 @@ import {
     LuLayoutDashboard,
     LuHandCoins,
     LuWalletMinimal,
-    LuTarget,
-    LuRepeat,
     LuSettings,
     LuLogOut,
 } from 'react-icons/lu';
@@ -29,24 +27,12 @@ export const SIDE_MENU_DATA = [
     },
     {
         id: '04',
-        label: "Budgets",
-        icon: LuTarget,
-        path: "/budgets",
-    },
-    {
-        id: '05',
-        label: "Recurring",
-        icon: LuRepeat,
-        path: "/recurring",
-    },
-    {
-        id: '06',
         label: "Settings",
         icon: LuSettings,
         path: "/settings",
     },
     {
-        id: '07',
+        id: '05',
         label: "Logout",
         icon: LuLogOut,
         path: "logout",
@@ -67,39 +53,22 @@ export const EXPENSE_CATEGORIES = [
     "Other",
 ];
 
-export const BUDGET_CATEGORY_SUGGESTIONS = [
-    "Overall",
-    ...EXPENSE_CATEGORIES,
-];
-
-export const INCOME_SOURCES = [
-    "Salary",
-    "Freelance",
-    "Business",
-    "Investments",
-    "Bonus",
-    "Rental",
-    "Gift",
-    "Other",
-];
-
 export const EXPENSE_PAYMENT_METHODS = [
-    "UPI / Card",
     "Cash",
-    "Credit Card",
     "Debit Card",
+    "Credit Card",
     "Bank Transfer",
-    "Net Banking",
-    "Wallet",
+    "Digital Wallet",
+    "Other",
 ];
 
 export const INCOME_PAYMENT_METHODS = [
     "Bank Transfer",
-    "UPI",
+    "Direct Deposit",
     "Cash",
     "Cheque",
-    "PayPal / Stripe",
-    "Direct Deposit",
+    "Digital Wallet",
+    "Other",
 ];
 
 export const SORT_OPTIONS = [

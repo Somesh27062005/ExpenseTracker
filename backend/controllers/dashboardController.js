@@ -1,8 +1,6 @@
 const Income = require("../models/Income");
 const Expense = require("../models/Expense");
 const { Types } = require("mongoose");
-const { getBudgetSummaryForMonth } = require("./budgetController");
-const { syncUserRecurringTransactions } = require("./recurringController");
 
 const MONTH_NAMES = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
@@ -12,9 +10,6 @@ exports.getDashboardData = async (req, res) => {
         const userId = req.user.id;
         const userObjectId = new Types.ObjectId(String(userId));
 
-        // Auto-sync any due recurring income/expenses before computing dashboard stats
-        const autoLoggedCount = await syncUserRecurringTransactions(userId);
-
         const now = new Date();
         const currentYear = now.getUTCFullYear();
         const currentMonthIndex = now.getUTCMonth();
@@ -23,7 +18,7 @@ exports.getDashboardData = async (req, res) => {
         const nextMonthStart = new Date(Date.UTC(currentYear, currentMonthIndex + 1, 1));
         const sixMonthsStart = new Date(Date.UTC(currentYear, currentMonthIndex - 5, 1));
 
-        // Fetch total income & expenses + monthly trends in parallel
+        // Fetch total income & expenses + monthly trends + current month category breakdown
         const [
             totalIncomeAgg,
             totalExpenseAgg,
@@ -33,7 +28,7 @@ exports.getDashboardData = async (req, res) => {
             recentExpenses,
             monthlyIncomeAgg,
             monthlyExpenseAgg,
-            budgetSummary,
+            currentMonthCategoryAgg,
         ] = await Promise.all([
             Income.aggregate([
                 { $match: { userId: userObjectId } },
@@ -71,7 +66,22 @@ exports.getDashboardData = async (req, res) => {
                     },
                 },
             ]),
-            getBudgetSummaryForMonth(userId, currentMonthKey),
+            Expense.aggregate([
+                {
+                    $match: {
+                        userId: userObjectId,
+                        date: { $gte: currentMonthStart, $lt: nextMonthStart },
+                    },
+                },
+                {
+                    $group: {
+                        _id: { $toLower: { $trim: { input: "$category" } } },
+                        displayName: { $first: "$category" },
+                        total: { $sum: "$amount" },
+                    },
+                },
+                { $sort: { total: -1 } },
+            ]),
         ]);
 
         const incomeLast60Days = last60DaysIncomeTransactions.reduce(
@@ -150,9 +160,10 @@ exports.getDashboardData = async (req, res) => {
                 savingsRate,
             },
             monthlyTrend,
-            categorySpending: budgetSummary.categoryBreakdown || [],
-            budgetSummary,
-            autoLoggedCount,
+            categorySpending: currentMonthCategoryAgg.map((c) => ({
+                name: c.displayName,
+                amount: c.total,
+            })),
         });
     } catch (error) {
         res.status(500).json({ message: "Server Error", error: error.message });

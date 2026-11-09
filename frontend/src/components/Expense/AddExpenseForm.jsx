@@ -13,7 +13,7 @@ const AddExpenseForm = ({ onAddExpense, initialData = null, isSubmitting = false
         amount: initialData?.amount ?? "",
         date: initialData?.date ? formatDateForInput(initialData.date) : getTodayInputDate(),
         icon: initialData?.icon || "",
-        paymentMethod: initialData?.paymentMethod || "UPI / Card",
+        paymentMethod: initialData?.paymentMethod || "Cash",
         notes: initialData?.notes || "",
     });
 

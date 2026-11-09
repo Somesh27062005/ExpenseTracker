@@ -35,6 +35,7 @@ const Expense = () => {
     const [search, setSearch] = useState("");
     const [selectedCategory, setSelectedCategory] = useState("all");
     const [dateRangePreset, setDateRangePreset] = useState("all");
+    const [selectedMonth, setSelectedMonth] = useState(getCurrentMonthKey());
     const [startDate, setStartDate] = useState("");
     const [endDate, setEndDate] = useState("");
     const [sortBy, setSortBy] = useState("date_desc");
@@ -93,6 +94,8 @@ const Expense = () => {
             const itemDateKey = formatDateForInput(item.date);
             if (dateRangePreset === "this_month") {
                 if (!itemDateKey.startsWith(currentMonth)) return false;
+            } else if (dateRangePreset === "month") {
+                if (!itemDateKey.startsWith(selectedMonth)) return false;
             } else if (dateRangePreset === "last_30") {
                 if (itemDateKey < thirtyDaysAgoKey) return false;
             } else if (dateRangePreset === "custom") {
@@ -115,7 +118,7 @@ const Expense = () => {
             }
             return new Date(b.date) - new Date(a.date);
         });
-    }, [expenseData, search, selectedCategory, dateRangePreset, startDate, endDate, sortBy]);
+    }, [expenseData, search, selectedCategory, dateRangePreset, selectedMonth, startDate, endDate, sortBy]);
 
     const hasActiveFilters =
         Boolean(search.trim()) ||
@@ -127,6 +130,7 @@ const Expense = () => {
         setSearch("");
         setSelectedCategory("all");
         setDateRangePreset("all");
+        setSelectedMonth(getCurrentMonthKey());
         setStartDate("");
         setEndDate("");
         setSortBy("date_desc");
@@ -227,6 +231,8 @@ const Expense = () => {
                     categoryLabel="Category"
                     dateRangePreset={dateRangePreset}
                     onDateRangePresetChange={setDateRangePreset}
+                    selectedMonth={selectedMonth}
+                    onSelectedMonthChange={setSelectedMonth}
                     startDate={startDate}
                     onStartDateChange={setStartDate}
                     endDate={endDate}

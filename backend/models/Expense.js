@@ -6,7 +6,7 @@ const ExpenseSchema=new mongoose.Schema({
     category:{type:String,required:true,trim:true}, //Example: Food,Rent,Groceries
     amount:{type:Number,required:true,min:0.01},
     date:{type:Date,default:Date.now},
-    paymentMethod:{type:String,trim:true,default:"UPI / Card"},
+    paymentMethod:{type:String,trim:true,default:"Cash"},
     notes:{type:String,trim:true,default:""},
 },{timestamps:true});
 

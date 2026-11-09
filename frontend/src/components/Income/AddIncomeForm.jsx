@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import Input from '../Inputs/Input';
 import EmojiPickerPopup from '../EmojiPickerPopup';
-import { INCOME_PAYMENT_METHODS, INCOME_SOURCES } from '../../utils/data';
+import { INCOME_PAYMENT_METHODS } from '../../utils/data';
 import { formatDateForInput, getTodayInputDate } from '../../utils/helper';
 import { LuLoaderCircle } from 'react-icons/lu';
 
@@ -36,27 +36,6 @@ const AddIncomeForm = ({ onAddIncome, initialData = null, isSubmitting = false }
                 icon={income.icon}
                 onSelect={(selectedIcon) => handleChange('icon', selectedIcon)}
             />
-
-            <div className="mb-4">
-                <p className="text-xs text-gray-500 mb-2">Quick Sources</p>
-                <div className="flex flex-wrap gap-2">
-                    {INCOME_SOURCES.map((item) => (
-                        <button
-                            key={item}
-                            type="button"
-                            disabled={isSubmitting}
-                            onClick={() => handleChange("source", item)}
-                            className={`text-xs px-3 py-1 rounded-full border cursor-pointer transition-colors ${
-                                income.source.toLowerCase() === item.toLowerCase()
-                                    ? "bg-primary text-white border-primary"
-                                    : "bg-gray-50 text-gray-700 border-gray-200 hover:bg-purple-50"
-                            }`}
-                        >
-                            {item}
-                        </button>
-                    ))}
-                </div>
-            </div>
 
             <Input
                 value={income.source}

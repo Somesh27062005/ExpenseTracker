@@ -29,7 +29,7 @@ exports.addExpense=async (req,res) => {
             category: String(category).trim(),
             amount: parsedAmount,
             date: parsedDate,
-            paymentMethod: paymentMethod ? String(paymentMethod).trim() : "UPI / Card",
+            paymentMethod: paymentMethod ? String(paymentMethod).trim() : "Cash",
             notes: notes ? String(notes).trim() : "",
         });
 
@@ -142,7 +142,7 @@ exports.downloadExpenseExcel=async (req,res) => {
         const data=expense.map((item) => ({
             Category:item.category,
             Amount:item.amount,
-            "Payment Method":item.paymentMethod || "UPI / Card",
+            "Payment Method":item.paymentMethod || "Cash",
             Date:item.date ? new Date(item.date).toISOString().split("T")[0] : "",
             Notes:item.notes || "",
         }));

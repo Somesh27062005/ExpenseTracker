@@ -80,6 +80,11 @@ export const getCurrentMonthKey = () => {
     return moment().format("YYYY-MM");
 };
 
+export const formatMonthLabel = (monthKey) => {
+    if (!monthKey || !/^\d{4}-\d{2}$/.test(monthKey)) return "";
+    return moment.utc(`${monthKey}-01`, "YYYY-MM-DD").format("MMMM YYYY");
+};
+
 export const prepareExpenseBarChartData = (data = []) => {
     const sortedData = [...data].sort((a, b) => new Date(a.date) - new Date(b.date));
 

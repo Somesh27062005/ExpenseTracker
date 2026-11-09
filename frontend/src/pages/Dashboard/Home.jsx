@@ -14,7 +14,6 @@ import RecentIncomeWithChart from '../../components/Charts/RecentIncomeWithChart
 import RecentIncome from '../../components/Dashboard/RecentIncome';
 import IncomeVsExpenseChart from '../../components/Charts/IncomeVsExpenseChart';
 import CategoryBreakdownChart from '../../components/Dashboard/CategoryBreakdownChart';
-import BudgetAlertsCard from '../../components/Dashboard/BudgetAlertsCard';
 import Modal from '../../components/Modal';
 import AddIncomeForm from '../../components/Income/AddIncomeForm';
 import AddExpenseForm from '../../components/Expense/AddExpenseForm';
@@ -47,11 +46,6 @@ const Home = () => {
             const response = await axiosInstance.get(API_PATHS.DASHBOARD.GET_DATA);
             if (response.data) {
                 setDashboardData(response.data);
-                if (response.data.autoLoggedCount > 0) {
-                    toast.success(
-                        `Auto-logged ${response.data.autoLoggedCount} recurring transaction(s)`
-                    );
-                }
             }
         } catch (error) {
             console.error("Failed to fetch dashboard data:", error);
@@ -273,12 +267,6 @@ const Home = () => {
                                 </div>
                             </div>
                         </div>
-
-                        {/* Monthly Budgets & Alerts Widget */}
-                        <BudgetAlertsCard
-                            budgetSummary={dashboardData?.budgetSummary}
-                            onManageBudgets={() => navigate("/budgets")}
-                        />
 
                         {/* 6-Month Cashflow & Category Spending */}
                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

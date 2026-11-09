@@ -9,6 +9,7 @@ import {
     formatDateDisplay,
     formatDateForInput,
     getTodayInputDate,
+    isIconUrl,
 } from '../../utils/helper';
 import {
     EXPENSE_CATEGORIES,
@@ -120,6 +121,7 @@ const RecurringForm = ({ initialData, onSubmit, isSubmitting = false }) => {
 
             <EmojiPickerPopup
                 icon={form.icon}
+                variant={form.type}
                 onSelect={(selectedIcon) => handleChange("icon", selectedIcon)}
             />
 
@@ -488,11 +490,17 @@ const Recurring = () => {
                                         <div className="flex items-center gap-3 min-w-0">
                                             <div className="w-11 h-11 rounded-full bg-gray-100 flex items-center justify-center shrink-0 text-gray-700">
                                                 {rule.icon ? (
-                                                    <img
-                                                        src={rule.icon}
-                                                        alt={rule.title}
-                                                        className="w-6 h-6"
-                                                    />
+                                                    isIconUrl(rule.icon) ? (
+                                                        <img
+                                                            src={rule.icon}
+                                                            alt={rule.title}
+                                                            className="w-6 h-6 object-contain"
+                                                        />
+                                                    ) : (
+                                                        <span className="text-xl leading-none select-none">
+                                                            {rule.icon}
+                                                        </span>
+                                                    )
                                                 ) : (
                                                     <LuUtensils />
                                                 )}

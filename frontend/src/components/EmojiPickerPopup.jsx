@@ -1,80 +1,62 @@
-import React, { useEffect, useRef, useState } from 'react';
-import EmojiPicker from 'emoji-picker-react';
-import { LuImage, LuX } from 'react-icons/lu';
+import React from 'react';
+import { isIconUrl } from '../utils/helper';
 
-const EmojiPickerPopup = ({ icon, onSelect }) => {
-    const [isOpen, setIsOpen] = useState(false);
-    const pickerRef = useRef(null);
+const INCOME_ICONS = ["💼", "💻", "🏢", "📈", "💰", "🎁", "🏠", "🏆", "💳", "✨"];
+const EXPENSE_ICONS = ["🍔", "🛒", "🏠", "🚗", "🛍️", "⚡", "🎬", "🏥", "✈️", "📚", "🎁", "💳"];
 
-    useEffect(() => {
-        if (!isOpen) return undefined;
-
-        const handleOutsideClick = (event) => {
-            if (pickerRef.current && !pickerRef.current.contains(event.target)) {
-                setIsOpen(false);
-            }
-        };
-
-        const handleKeyDown = (event) => {
-            if (event.key === "Escape") {
-                event.stopPropagation();
-                setIsOpen(false);
-            }
-        };
-
-        document.addEventListener("mousedown", handleOutsideClick);
-        window.addEventListener("keydown", handleKeyDown, true);
-        return () => {
-            document.removeEventListener("mousedown", handleOutsideClick);
-            window.removeEventListener("keydown", handleKeyDown, true);
-        };
-    }, [isOpen]);
+const EmojiPickerPopup = ({ icon = "", onSelect, variant = "expense" }) => {
+    const baseIcons = variant === "income" ? INCOME_ICONS : EXPENSE_ICONS;
+    const isLegacyImage = isIconUrl(icon);
+    const hasCustomEmoji = Boolean(icon) && !isLegacyImage && !baseIcons.includes(icon);
+    const iconOptions = hasCustomEmoji ? [icon, ...baseIcons] : baseIcons;
 
     return (
-        <div ref={pickerRef} className="relative inline-block mb-5">
-            <button
-                type="button"
-                className="flex items-center gap-4 cursor-pointer text-left"
-                onClick={() => setIsOpen((prev) => !prev)}
-                aria-expanded={isOpen}
-            >
-                <div className="w-12 h-12 flex items-center justify-center text-2xl bg-purple-50 text-primary rounded-lg">
-                    {icon ? (
-                        <img src={icon} alt="icon" className="w-10 h-10" />
-                    ) : (
-                        <LuImage />
-                    )}
-                </div>
-
-                <span className="text-sm text-gray-700">
-                    {icon ? "Change Icon" : "Pick Icon"}
-                </span>
-            </button>
-
-            {isOpen && (
-                <div className="absolute left-0 top-full mt-2 z-50 w-[320px] max-w-[calc(100vw-4.5rem)] bg-white shadow-2xl rounded-xl">
+        <div className="mb-4">
+            <div className="flex items-center justify-between mb-2">
+                <p className="text-[13px] text-slate-800">Icon (Optional)</p>
+                {icon && (
                     <button
                         type="button"
-                        className="w-7 h-7 flex items-center justify-center bg-white border border-gray-200 rounded-full absolute -top-2.5 -right-2.5 z-10 cursor-pointer shadow-sm hover:bg-gray-50 text-gray-600"
-                        onClick={() => setIsOpen(false)}
-                        aria-label="Close emoji picker"
+                        onClick={() => onSelect("")}
+                        className="text-xs text-gray-400 hover:text-red-500 cursor-pointer transition-colors"
                     >
-                        <LuX className="text-xs" />
+                        Clear
                     </button>
+                )}
+            </div>
 
-                    <EmojiPicker
-                        open={isOpen}
-                        width="100%"
-                        height={320}
-                        previewConfig={{ showPreview: false }}
-                        lazyLoadEmojis
-                        onEmojiClick={(emoji) => {
-                            onSelect(emoji?.imageUrl || "");
-                            setIsOpen(false);
-                        }}
-                    />
-                </div>
-            )}
+            <div className="flex flex-wrap items-center gap-2">
+                {isLegacyImage && (
+                    <button
+                        type="button"
+                        onClick={() => onSelect("")}
+                        title="Click to clear current icon"
+                        className="w-9 h-9 flex items-center justify-center rounded-lg border border-primary bg-purple-50 ring-2 ring-purple-200 cursor-pointer"
+                    >
+                        <img src={icon} alt="Selected icon" className="w-6 h-6 object-contain" />
+                    </button>
+                )}
+
+                {iconOptions.map((item) => {
+                    const isSelected = icon === item;
+                    return (
+                        <button
+                            key={item}
+                            type="button"
+                            onClick={() => onSelect(isSelected ? "" : item)}
+                            className={`w-9 h-9 flex items-center justify-center text-lg rounded-lg border cursor-pointer transition-colors ${
+                                isSelected
+                                    ? "border-primary bg-purple-50 ring-2 ring-purple-200"
+                                    : "border-gray-200 bg-slate-50 hover:bg-purple-50/70 hover:border-purple-200"
+                            }`}
+                            aria-pressed={isSelected}
+                            title={isSelected ? "Click to remove icon" : "Select icon"}
+                        >
+                            {item}
+                        </button>
+                    );
+                })}
+            </div>
         </div>
     );
 };

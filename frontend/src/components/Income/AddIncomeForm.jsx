@@ -34,6 +34,7 @@ const AddIncomeForm = ({ onAddIncome, initialData = null, isSubmitting = false }
         <form onSubmit={handleSubmit}>
             <EmojiPickerPopup
                 icon={income.icon}
+                variant="income"
                 onSelect={(selectedIcon) => handleChange('icon', selectedIcon)}
             />
 

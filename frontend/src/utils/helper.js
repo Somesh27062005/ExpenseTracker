@@ -85,6 +85,10 @@ export const formatMonthLabel = (monthKey) => {
     return moment.utc(`${monthKey}-01`, "YYYY-MM-DD").format("MMMM YYYY");
 };
 
+export const isIconUrl = (value) => {
+    return typeof value === "string" && /^(https?:\/\/|\/|data:image\/)/i.test(value.trim());
+};
+
 export const prepareExpenseBarChartData = (data = []) => {
     const sortedData = [...data].sort((a, b) => new Date(a.date) - new Date(b.date));
 

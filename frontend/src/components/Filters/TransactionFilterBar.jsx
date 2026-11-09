@@ -4,14 +4,6 @@ import { SORT_OPTIONS } from '../../utils/data';
 import MonthPicker from '../Inputs/MonthPicker';
 import { getCurrentMonthKey } from '../../utils/helper';
 
-const openDatePicker = (e) => {
-    try {
-        e.currentTarget.showPicker?.();
-    } catch {
-        // Ignore when browser restricts showPicker
-    }
-};
-
 const TransactionFilterBar = ({
     search = "",
     onSearchChange,
@@ -123,8 +115,7 @@ const TransactionFilterBar = ({
                             type="date"
                             value={startDate}
                             onChange={(e) => onStartDateChange(e.target.value)}
-                            onClick={openDatePicker}
-                            className="w-full bg-slate-50 border border-gray-200 rounded-lg px-3 py-1.5 text-sm text-gray-700 outline-none cursor-pointer"
+                            className="w-full bg-slate-50 border border-gray-200 rounded-lg px-3 py-1.5 text-sm text-gray-700 outline-none"
                         />
                     </div>
                     <div className="flex items-center gap-2">
@@ -133,8 +124,7 @@ const TransactionFilterBar = ({
                             type="date"
                             value={endDate}
                             onChange={(e) => onEndDateChange(e.target.value)}
-                            onClick={openDatePicker}
-                            className="w-full bg-slate-50 border border-gray-200 rounded-lg px-3 py-1.5 text-sm text-gray-700 outline-none cursor-pointer"
+                            className="w-full bg-slate-50 border border-gray-200 rounded-lg px-3 py-1.5 text-sm text-gray-700 outline-none"
                         />
                     </div>
                 </div>

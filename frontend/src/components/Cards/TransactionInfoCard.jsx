@@ -7,7 +7,7 @@ import {
     LuPencil,
 } from 'react-icons/lu';
 import { UserContext } from '../../context/UserContext';
-import { formatCurrency } from '../../utils/helper';
+import { formatCurrency, isIconUrl } from '../../utils/helper';
 
 const TransactionInfoCard = ({
     title,
@@ -32,7 +32,11 @@ const TransactionInfoCard = ({
             <div className="flex items-center gap-3.5 min-w-0 flex-1">
                 <div className="w-11 h-11 flex items-center justify-center text-xl text-gray-800 bg-gray-100 rounded-full shrink-0">
                     {icon ? (
-                        <img src={icon} alt={title} className="w-6 h-6" />
+                        isIconUrl(icon) ? (
+                            <img src={icon} alt={title} className="w-6 h-6 object-contain" />
+                        ) : (
+                            <span className="text-xl leading-none select-none">{icon}</span>
+                        )
                     ) : (
                         <LuUtensils />
                     )}

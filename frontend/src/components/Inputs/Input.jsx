@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useState } from 'react';
 import { FaRegEye, FaRegEyeSlash } from 'react-icons/fa6';
 
 const Input = ({
@@ -13,7 +13,6 @@ const Input = ({
     disabled = false,
 }) => {
     const [showPassword, setShowPassword] = useState(false);
-    const inputRef = useRef(null);
 
     const toggleShowPassword = () => {
         setShowPassword((prev) => !prev);
@@ -22,37 +21,18 @@ const Input = ({
     const resolvedType =
         type === 'password' ? (showPassword ? 'text' : 'password') : type;
 
-    const isPickerType = resolvedType === "date" || resolvedType === "month";
-
-    const handlePickerTrigger = () => {
-        if (!isPickerType || disabled) return;
-        try {
-            inputRef.current?.showPicker?.();
-        } catch {
-            // Fallback silently when showPicker is not supported or blocked
-        }
-    };
-
     return (
         <div>
             {label && <label className="text-[13px] text-slate-800">{label}</label>}
 
-            <div
-                className={`input-box ${disabled ? "opacity-70" : ""} ${
-                    isPickerType && !disabled ? "cursor-pointer" : ""
-                }`}
-                onClick={handlePickerTrigger}
-            >
+            <div className={`input-box ${disabled ? "opacity-70" : ""}`}>
                 <input
-                    ref={inputRef}
                     type={resolvedType}
                     inputMode={resolvedType === "number" ? "decimal" : undefined}
                     onWheel={resolvedType === "number" ? (e) => e.currentTarget.blur() : undefined}
                     placeholder={placeholder}
-                    className={`w-full bg-transparent outline-none ${
-                        isPickerType && !disabled ? "cursor-pointer" : ""
-                    }`}
-                    value={value}
+                    className="w-full bg-transparent outline-none"
+                    value={value ?? ""}
                     onChange={(e) => onChange(e)}
                     min={min}
                     max={max}

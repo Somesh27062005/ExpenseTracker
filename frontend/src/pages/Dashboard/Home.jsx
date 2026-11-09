@@ -74,6 +74,10 @@ const Home = () => {
             toast.error("Date is required.");
             return;
         }
+        if (!paymentMethod || !paymentMethod.trim()) {
+            toast.error("Please enter a payment method.");
+            return;
+        }
 
         setSubmittingQuick(true);
         try {
@@ -82,7 +86,7 @@ const Home = () => {
                 amount,
                 date,
                 icon,
-                paymentMethod,
+                paymentMethod: paymentMethod.trim(),
                 notes,
             });
             setQuickModalType(null);
@@ -110,6 +114,10 @@ const Home = () => {
             toast.error("Date is required.");
             return;
         }
+        if (!paymentMethod || !paymentMethod.trim()) {
+            toast.error("Please enter a payment method.");
+            return;
+        }
 
         setSubmittingQuick(true);
         try {
@@ -118,7 +126,7 @@ const Home = () => {
                 amount,
                 date,
                 icon,
-                paymentMethod,
+                paymentMethod: paymentMethod.trim(),
                 notes,
             });
             setQuickModalType(null);

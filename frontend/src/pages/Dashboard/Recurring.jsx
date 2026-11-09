@@ -13,13 +13,12 @@ import {
 } from '../../utils/helper';
 import {
     EXPENSE_CATEGORIES,
-    EXPENSE_PAYMENT_METHODS,
-    INCOME_PAYMENT_METHODS,
     INCOME_SOURCES,
 } from '../../utils/data';
 import Modal from '../../components/Modal';
 import DeleteAlert from '../../components/DeleteAlert';
 import Input from '../../components/Inputs/Input';
+import PaymentMethodSelect from '../../components/Inputs/PaymentMethodSelect';
 import EmojiPickerPopup from '../../components/EmojiPickerPopup';
 import toast from 'react-hot-toast';
 import {
@@ -47,9 +46,7 @@ const RecurringForm = ({ initialData, onSubmit, isSubmitting = false }) => {
             ? formatDateForInput(initialData.nextDueDate)
             : getTodayInputDate(),
         icon: initialData?.icon || "",
-        paymentMethod:
-            initialData?.paymentMethod ||
-            (initialData?.type === "income" ? "Bank Transfer" : "UPI / Card"),
+        paymentMethod: initialData?.paymentMethod || "Cash",
         notes: initialData?.notes || "",
     });
 
@@ -57,27 +54,14 @@ const RecurringForm = ({ initialData, onSubmit, isSubmitting = false }) => {
         setForm((prev) => ({ ...prev, [key]: value }));
 
     const handleTypeSwitch = (nextType) => {
-        setForm((prev) => {
-            const defaultMethod =
-                nextType === "income" ? "Bank Transfer" : "UPI / Card";
-            const wasDefaultOther =
-                prev.paymentMethod === "Bank Transfer" ||
-                prev.paymentMethod === "UPI / Card";
-            return {
-                ...prev,
-                type: nextType,
-                paymentMethod: wasDefaultOther ? defaultMethod : prev.paymentMethod,
-            };
-        });
+        setForm((prev) => ({
+            ...prev,
+            type: nextType,
+        }));
     };
 
     const suggestions =
         form.type === "income" ? INCOME_SOURCES : EXPENSE_CATEGORIES;
-    const baseMethods =
-        form.type === "income" ? INCOME_PAYMENT_METHODS : EXPENSE_PAYMENT_METHODS;
-    const paymentOptions = baseMethods.includes(form.paymentMethod)
-        ? baseMethods
-        : [form.paymentMethod, ...baseMethods];
 
     const handleSubmit = (e) => {
         e.preventDefault();
@@ -196,21 +180,11 @@ const RecurringForm = ({ initialData, onSubmit, isSubmitting = false }) => {
                     </select>
                 </div>
 
-                <div>
-                    <label className="text-[13px] text-slate-800">Payment Method</label>
-                    <select
-                        value={form.paymentMethod}
-                        onChange={({ target }) => handleChange("paymentMethod", target.value)}
-                        disabled={isSubmitting}
-                        className="input-box cursor-pointer disabled:opacity-70"
-                    >
-                        {paymentOptions.map((method) => (
-                            <option key={method} value={method}>
-                                {method}
-                            </option>
-                        ))}
-                    </select>
-                </div>
+                <PaymentMethodSelect
+                    value={form.paymentMethod}
+                    onChange={(method) => handleChange("paymentMethod", method)}
+                    disabled={isSubmitting}
+                />
             </div>
 
             <Input

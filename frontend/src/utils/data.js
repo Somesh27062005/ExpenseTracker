@@ -53,23 +53,19 @@ export const EXPENSE_CATEGORIES = [
     "Other",
 ];
 
-export const EXPENSE_PAYMENT_METHODS = [
+export const PRESET_PAYMENT_METHODS = [
     "Cash",
-    "Debit Card",
-    "Credit Card",
-    "Bank Transfer",
-    "Digital Wallet",
-    "Other",
+    "UPI",
 ];
 
-export const INCOME_PAYMENT_METHODS = [
-    "Bank Transfer",
-    "Direct Deposit",
-    "Cash",
-    "Cheque",
-    "Digital Wallet",
-    "Other",
+export const PAYMENT_METHODS = [
+    ...PRESET_PAYMENT_METHODS,
+    "Others",
 ];
+
+export const EXPENSE_PAYMENT_METHODS = PAYMENT_METHODS;
+
+export const INCOME_PAYMENT_METHODS = PAYMENT_METHODS;
 
 export const SORT_OPTIONS = [
     { value: "date_desc", label: "Newest First" },

@@ -6,7 +6,7 @@ const IncomeSchema=new mongoose.Schema({
     source:{type:String,required:true,trim:true}, //Example: Salary,Freelance, etc.
     amount:{type:Number,required:true,min:0.01},
     date:{type:Date,default:Date.now},
-    paymentMethod:{type:String,trim:true,default:"Bank Transfer"},
+    paymentMethod:{type:String,trim:true,default:"Cash"},
     notes:{type:String,trim:true,default:""},
 },{timestamps:true});
 

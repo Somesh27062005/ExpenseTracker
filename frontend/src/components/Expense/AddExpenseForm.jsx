@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import Input from '../Inputs/Input';
+import PaymentMethodSelect from '../Inputs/PaymentMethodSelect';
 import EmojiPickerPopup from '../EmojiPickerPopup';
-import { EXPENSE_CATEGORIES, EXPENSE_PAYMENT_METHODS } from '../../utils/data';
+import { EXPENSE_CATEGORIES } from '../../utils/data';
 import { formatDateForInput, getTodayInputDate } from '../../utils/helper';
 import { LuLoaderCircle } from 'react-icons/lu';
 
@@ -18,10 +19,6 @@ const AddExpenseForm = ({ onAddExpense, initialData = null, isSubmitting = false
     });
 
     const handleChange = (key, value) => setExpense((prev) => ({ ...prev, [key]: value }));
-
-    const paymentOptions = EXPENSE_PAYMENT_METHODS.includes(expense.paymentMethod)
-        ? EXPENSE_PAYMENT_METHODS
-        : [expense.paymentMethod, ...EXPENSE_PAYMENT_METHODS];
 
     const handleSubmit = (e) => {
         e.preventDefault();
@@ -89,21 +86,11 @@ const AddExpenseForm = ({ onAddExpense, initialData = null, isSubmitting = false
                 />
             </div>
 
-            <div>
-                <label className="text-[13px] text-slate-800">Payment Method</label>
-                <select
-                    value={expense.paymentMethod}
-                    onChange={({ target }) => handleChange("paymentMethod", target.value)}
-                    disabled={isSubmitting}
-                    className="input-box cursor-pointer disabled:opacity-70"
-                >
-                    {paymentOptions.map((method) => (
-                        <option key={method} value={method}>
-                            {method}
-                        </option>
-                    ))}
-                </select>
-            </div>
+            <PaymentMethodSelect
+                value={expense.paymentMethod}
+                onChange={(method) => handleChange("paymentMethod", method)}
+                disabled={isSubmitting}
+            />
 
             <Input
                 value={expense.notes}

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import Input from '../Inputs/Input';
+import PaymentMethodSelect from '../Inputs/PaymentMethodSelect';
 import EmojiPickerPopup from '../EmojiPickerPopup';
-import { INCOME_PAYMENT_METHODS } from '../../utils/data';
 import { formatDateForInput, getTodayInputDate } from '../../utils/helper';
 import { LuLoaderCircle } from 'react-icons/lu';
 
@@ -13,15 +13,11 @@ const AddIncomeForm = ({ onAddIncome, initialData = null, isSubmitting = false }
         amount: initialData?.amount ?? "",
         date: initialData?.date ? formatDateForInput(initialData.date) : getTodayInputDate(),
         icon: initialData?.icon || "",
-        paymentMethod: initialData?.paymentMethod || "Bank Transfer",
+        paymentMethod: initialData?.paymentMethod || "Cash",
         notes: initialData?.notes || "",
     });
 
     const handleChange = (key, value) => setIncome((prev) => ({ ...prev, [key]: value }));
-
-    const paymentOptions = INCOME_PAYMENT_METHODS.includes(income.paymentMethod)
-        ? INCOME_PAYMENT_METHODS
-        : [income.paymentMethod, ...INCOME_PAYMENT_METHODS];
 
     const handleSubmit = (e) => {
         e.preventDefault();
@@ -68,21 +64,11 @@ const AddIncomeForm = ({ onAddIncome, initialData = null, isSubmitting = false }
                 />
             </div>
 
-            <div>
-                <label className="text-[13px] text-slate-800">Payment Method</label>
-                <select
-                    value={income.paymentMethod}
-                    onChange={({ target }) => handleChange("paymentMethod", target.value)}
-                    disabled={isSubmitting}
-                    className="input-box cursor-pointer disabled:opacity-70"
-                >
-                    {paymentOptions.map((method) => (
-                        <option key={method} value={method}>
-                            {method}
-                        </option>
-                    ))}
-                </select>
-            </div>
+            <PaymentMethodSelect
+                value={income.paymentMethod}
+                onChange={(method) => handleChange("paymentMethod", method)}
+                disabled={isSubmitting}
+            />
 
             <Input
                 value={income.notes}

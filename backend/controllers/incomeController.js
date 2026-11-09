@@ -29,7 +29,7 @@ exports.addIncome=async (req,res) => {
             source: String(source).trim(),
             amount: parsedAmount,
             date: parsedDate,
-            paymentMethod: paymentMethod ? String(paymentMethod).trim() : "Bank Transfer",
+            paymentMethod: paymentMethod ? String(paymentMethod).trim() : "Cash",
             notes: notes ? String(notes).trim() : "",
         });
 
@@ -142,7 +142,7 @@ exports.downloadIncomeExcel=async (req,res) => {
         const data=income.map((item) => ({
             Source:item.source,
             Amount:item.amount,
-            "Payment Method":item.paymentMethod || "Bank Transfer",
+            "Payment Method":item.paymentMethod || "Cash",
             Date:item.date ? new Date(item.date).toISOString().split("T")[0] : "",
             Notes:item.notes || "",
         }));

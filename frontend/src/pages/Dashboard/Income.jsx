@@ -151,8 +151,19 @@ const Income = () => {
             toast.error("Date is required.");
             return;
         }
+        if (!paymentMethod || !paymentMethod.trim()) {
+            toast.error("Please enter a payment method.");
+            return;
+        }
 
-        const payload = { source, amount, date, icon, paymentMethod, notes };
+        const payload = {
+            source,
+            amount,
+            date,
+            icon,
+            paymentMethod: paymentMethod.trim(),
+            notes,
+        };
         const editingId = formModal.data?._id;
 
         setSubmitting(true);

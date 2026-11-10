@@ -14,16 +14,12 @@ import RecentIncomeWithChart from '../../components/Charts/RecentIncomeWithChart
 import RecentIncome from '../../components/Dashboard/RecentIncome';
 import IncomeVsExpenseChart from '../../components/Charts/IncomeVsExpenseChart';
 import CategoryBreakdownChart from '../../components/Dashboard/CategoryBreakdownChart';
-import Modal from '../../components/Modal';
-import AddIncomeForm from '../../components/Income/AddIncomeForm';
-import AddExpenseForm from '../../components/Expense/AddExpenseForm';
 import { UserContext } from '../../context/UserContext';
 import toast from 'react-hot-toast';
 
 import {
     LuHandCoins,
     LuWalletMinimal,
-    LuPlus,
     LuPiggyBank,
     LuLoaderCircle,
 } from 'react-icons/lu';
@@ -37,8 +33,6 @@ const Home = () => {
 
     const [dashboardData, setDashboardData] = useState(null);
     const [loading, setLoading] = useState(false);
-    const [quickModalType, setQuickModalType] = useState(null); // "income" | "expense" | null
-    const [submittingQuick, setSubmittingQuick] = useState(false);
 
     const fetchDashboardData = useCallback(async () => {
         setLoading(true);
@@ -59,86 +53,6 @@ const Home = () => {
         fetchDashboardData();
     }, [fetchDashboardData]);
 
-    const handleQuickAddIncome = async (income) => {
-        const { source, amount, date, icon, paymentMethod, notes } = income;
-
-        if (!source.trim()) {
-            toast.error("Source is required.");
-            return;
-        }
-        if (!amount || isNaN(amount) || Number(amount) <= 0) {
-            toast.error("Amount should be a valid number greater than 0.");
-            return;
-        }
-        if (!date) {
-            toast.error("Date is required.");
-            return;
-        }
-        if (!paymentMethod || !paymentMethod.trim()) {
-            toast.error("Please enter a payment method.");
-            return;
-        }
-
-        setSubmittingQuick(true);
-        try {
-            await axiosInstance.post(API_PATHS.INCOME.ADD_INCOME, {
-                source,
-                amount,
-                date,
-                icon,
-                paymentMethod: paymentMethod.trim(),
-                notes,
-            });
-            setQuickModalType(null);
-            toast.success("Income added successfully");
-            fetchDashboardData();
-        } catch (error) {
-            toast.error(error.response?.data?.message || "Failed to add income");
-        } finally {
-            setSubmittingQuick(false);
-        }
-    };
-
-    const handleQuickAddExpense = async (expense) => {
-        const { category, amount, date, icon, paymentMethod, notes } = expense;
-
-        if (!category.trim()) {
-            toast.error("Category is required.");
-            return;
-        }
-        if (!amount || isNaN(amount) || Number(amount) <= 0) {
-            toast.error("Amount should be a valid number greater than 0.");
-            return;
-        }
-        if (!date) {
-            toast.error("Date is required.");
-            return;
-        }
-        if (!paymentMethod || !paymentMethod.trim()) {
-            toast.error("Please enter a payment method.");
-            return;
-        }
-
-        setSubmittingQuick(true);
-        try {
-            await axiosInstance.post(API_PATHS.EXPENSE.ADD_EXPENSE, {
-                category,
-                amount,
-                date,
-                icon,
-                paymentMethod: paymentMethod.trim(),
-                notes,
-            });
-            setQuickModalType(null);
-            toast.success("Expense added successfully");
-            fetchDashboardData();
-        } catch (error) {
-            toast.error(error.response?.data?.message || "Failed to add expense");
-        } finally {
-            setSubmittingQuick(false);
-        }
-    };
-
     const currency = user?.currency || "USD";
     const currentMonth = dashboardData?.currentMonth || {
         month: "",
@@ -151,40 +65,19 @@ const Home = () => {
     return (
         <DashboardLayout activeMenu="Dashboard">
             <div className="my-5 mx-auto space-y-6">
-                {/* Welcome & Quick Actions Header */}
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                    <div>
-                        <h3 className="text-xl font-semibold text-gray-900">
-                            Welcome back, {user?.fullName?.split(" ")[0] || "there"}
-                        </h3>
-                        <p className="text-xs text-gray-500 mt-0.5 flex items-center gap-1.5">
-                            {loading && <LuLoaderCircle className="animate-spin text-primary" />}
-                            <span>
-                                {loading
-                                    ? "Refreshing your financial overview..."
-                                    : "Here is your financial summary and cashflow health."}
-                            </span>
-                        </p>
-                    </div>
-
-                    <div className="flex flex-wrap items-center gap-2.5">
-                        <button
-                            type="button"
-                            onClick={() => setQuickModalType("income")}
-                            className="add-btn"
-                        >
-                            <LuPlus className="text-base" />
-                            Add Income
-                        </button>
-                        <button
-                            type="button"
-                            onClick={() => setQuickModalType("expense")}
-                            className="add-btn add-btn-fill"
-                        >
-                            <LuPlus className="text-base" />
-                            Add Expense
-                        </button>
-                    </div>
+                {/* Welcome Header */}
+                <div>
+                    <h3 className="text-xl font-semibold text-gray-900">
+                        Welcome back, {user?.fullName?.split(" ")[0] || "there"}
+                    </h3>
+                    <p className="text-xs text-gray-500 mt-0.5 flex items-center gap-1.5">
+                        {loading && <LuLoaderCircle className="animate-spin text-primary" />}
+                        <span>
+                            {loading
+                                ? "Refreshing your financial overview..."
+                                : "Here is your financial summary and cashflow health."}
+                        </span>
+                    </p>
                 </div>
 
                 {loading && !dashboardData ? (
@@ -322,30 +215,6 @@ const Home = () => {
                     </>
                 )}
             </div>
-
-            <Modal
-                isOpen={quickModalType === "income"}
-                onClose={() => !submittingQuick && setQuickModalType(null)}
-                title="Add Income"
-            >
-                <AddIncomeForm
-                    key="quick-income"
-                    onAddIncome={handleQuickAddIncome}
-                    isSubmitting={submittingQuick}
-                />
-            </Modal>
-
-            <Modal
-                isOpen={quickModalType === "expense"}
-                onClose={() => !submittingQuick && setQuickModalType(null)}
-                title="Add Expense"
-            >
-                <AddExpenseForm
-                    key="quick-expense"
-                    onAddExpense={handleQuickAddExpense}
-                    isSubmitting={submittingQuick}
-                />
-            </Modal>
         </DashboardLayout>
     );
 };

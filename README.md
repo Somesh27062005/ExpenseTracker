@@ -32,7 +32,7 @@ A full-stack financial dashboard web application built using the **MERN** stack.
 ## ✨ Features
 
 - 🔐 **User Authentication & Account Settings**: Secure JWT-based registration, login, profile photo upload, multi-currency selection (`USD`, `INR`, `EUR`, `GBP`), and password updates.
-- 📊 **Interactive Financial Dashboard**: Real-time all-time and current-month summaries (income, expenses, net savings, savings rate), quick-add modals, 6-month Income vs Expense chart, and monthly category breakdown.
+- 📊 **Interactive Financial Dashboard**: Real-time all-time and current-month summaries (income, expenses, net savings, savings rate), 6-month Income vs Expense chart, and monthly category breakdown.
 - 💰 **Full Income & Expense Management**: Add, edit, view, search, sort, and filter Income and Expense records by source/category, payment method, notes, month, or custom date ranges.
 - 📥 **Excel Data Export**: Export formatted income and expense spreadsheets (`.xlsx`) directly from memory.
 - 📱 **Responsive Dashboard UI**: Adaptive sidebar and mobile drawer built with React, Tailwind CSS, and Recharts.

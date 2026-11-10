@@ -45,7 +45,7 @@ const syncUserRecurringTransactions = async (userId) => {
                     source: rule.title,
                     amount: rule.amount,
                     date: currentDue,
-                    paymentMethod: rule.paymentMethod || "Bank Transfer",
+                    paymentMethod: rule.paymentMethod || "Cash",
                     notes: rule.notes ? `${rule.notes} (Auto-logged)` : "Recurring income",
                 });
             } else {
@@ -55,7 +55,7 @@ const syncUserRecurringTransactions = async (userId) => {
                     category: rule.title,
                     amount: rule.amount,
                     date: currentDue,
-                    paymentMethod: rule.paymentMethod || "UPI / Card",
+                    paymentMethod: rule.paymentMethod || "UPI",
                     notes: rule.notes ? `${rule.notes} (Auto-logged)` : "Recurring expense",
                 });
             }

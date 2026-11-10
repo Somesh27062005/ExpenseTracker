@@ -51,7 +51,11 @@ const ExpenseList = ({
                     No matching expense records found.
                 </div>
             ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4 mt-4">
+                <div
+                    className={`grid grid-cols-1 ${
+                        transactions.length > 1 ? "md:grid-cols-2" : ""
+                    } gap-x-4 mt-4`}
+                >
                     {transactions.map((expense) => (
                         <TransactionInfoCard
                             key={expense._id}

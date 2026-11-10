@@ -3,7 +3,6 @@ import { LuPlus } from 'react-icons/lu';
 import CustomBarChart from '../Charts/CustomBarChart';
 import { UserContext } from '../../context/UserContext';
 import {
-    buildCategoryBreakdown,
     formatCurrency,
     prepareDailyChartData,
     prepareIncomeBarChartData,
@@ -35,15 +34,6 @@ const IncomeOverview = ({
             (sum, item) => sum + Number(item?.amount || 0),
             0
         );
-        const topSource = buildCategoryBreakdown(transactions, "source")[0] || null;
-        const yearlyPeakMonth =
-            viewMode === "year"
-                ? chartData.reduce(
-                      (best, item) =>
-                          item.amount > (best?.amount || 0) ? item : best,
-                      null
-                  )
-                : null;
         const activeMonths =
             viewMode === "year"
                 ? chartData.filter((item) => item.count > 0).length
@@ -51,11 +41,6 @@ const IncomeOverview = ({
 
         return {
             total,
-            topSource,
-            yearlyPeakMonth:
-                yearlyPeakMonth && yearlyPeakMonth.amount > 0
-                    ? yearlyPeakMonth
-                    : null,
             activeMonths,
         };
     }, [transactions, viewMode, chartData]);
@@ -95,7 +80,7 @@ const IncomeOverview = ({
                 </button>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-5">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-5">
                 <div className="p-3.5 rounded-xl bg-emerald-50/70 border border-emerald-100">
                     <p className="text-xs font-medium text-emerald-700">
                         Total Income ({periodLabel})
@@ -113,27 +98,6 @@ const IncomeOverview = ({
                         {viewMode === "year"
                             ? `${summary.activeMonths} / 12 mo · ${transactions.length}`
                             : `${transactions.length} ${transactions.length === 1 ? "record" : "records"}`}
-                    </p>
-                </div>
-
-                <div className="p-3.5 rounded-xl bg-purple-50/70 border border-purple-100">
-                    <p className="text-xs font-medium text-purple-700">
-                        {viewMode === "year" ? "Highest Month" : "Top Source"}
-                    </p>
-                    <p className="text-sm font-semibold text-gray-900 mt-1.5 truncate">
-                        {viewMode === "year"
-                            ? summary.yearlyPeakMonth
-                                ? `${summary.yearlyPeakMonth.monthName} · ${formatCurrency(
-                                      summary.yearlyPeakMonth.amount,
-                                      currency
-                                  )}`
-                                : "—"
-                            : summary.topSource
-                            ? `${summary.topSource.name} · ${formatCurrency(
-                                  summary.topSource.amount,
-                                  currency
-                              )}`
-                            : "—"}
                     </p>
                 </div>
             </div>

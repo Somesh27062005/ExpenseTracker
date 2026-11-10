@@ -66,10 +66,3 @@ export const PAYMENT_METHODS = [
 export const EXPENSE_PAYMENT_METHODS = PAYMENT_METHODS;
 
 export const INCOME_PAYMENT_METHODS = PAYMENT_METHODS;
-
-export const SORT_OPTIONS = [
-    { value: "date_desc", label: "Newest First" },
-    { value: "date_asc", label: "Oldest First" },
-    { value: "amount_desc", label: "Highest Amount" },
-    { value: "amount_asc", label: "Lowest Amount" },
-];

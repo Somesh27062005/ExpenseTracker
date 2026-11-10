@@ -14,19 +14,32 @@ exports.getDashboardData = async (req, res) => {
         const userId = req.user.id;
         const userObjectId = new Types.ObjectId(String(userId));
 
+        const requestedMonth =
+            typeof req.query.month === "string" &&
+            /^\d{4}-(0[1-9]|1[0-2])$/.test(req.query.month.trim())
+                ? req.query.month.trim()
+                : null;
+
         const now = new Date();
-        const currentYear = now.getUTCFullYear();
-        const currentMonthIndex = now.getUTCMonth();
+        const currentYear = requestedMonth
+            ? Number(requestedMonth.split("-")[0])
+            : now.getUTCFullYear();
+        const currentMonthIndex = requestedMonth
+            ? Number(requestedMonth.split("-")[1]) - 1
+            : now.getUTCMonth();
         const currentMonthKey = `${currentYear}-${String(currentMonthIndex + 1).padStart(2, "0")}`;
         const currentMonthStart = new Date(Date.UTC(currentYear, currentMonthIndex, 1));
         const nextMonthStart = new Date(Date.UTC(currentYear, currentMonthIndex + 1, 1));
         const sixMonthsStart = new Date(Date.UTC(currentYear, currentMonthIndex - 5, 1));
+        const last30DaysStart = new Date(
+            Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() - 30)
+        );
 
-        // Fetch total income & expenses + monthly trends + current month category breakdown
+        // Fetch total income & expenses + last 30 days + monthly trends
         const [
             totalIncomeAgg,
             totalExpenseAgg,
-            last60DaysIncomeTransactions,
+            last30DaysIncomeTransactions,
             last30DaysExpenseTransactions,
             recentIncomes,
             recentExpenses,
@@ -44,12 +57,12 @@ exports.getDashboardData = async (req, res) => {
             ]),
             Income.find({
                 userId,
-                date: { $gte: new Date(Date.now() - 60 * 24 * 60 * 60 * 1000) },
-            }).sort({ date: -1 }),
+                date: { $gte: last30DaysStart },
+            }).sort({ date: -1, createdAt: -1 }),
             Expense.find({
                 userId,
-                date: { $gte: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) },
-            }).sort({ date: -1 }),
+                date: { $gte: last30DaysStart },
+            }).sort({ date: -1, createdAt: -1 }),
             Income.find({ userId }).sort({ date: -1, createdAt: -1 }).limit(5),
             Expense.find({ userId }).sort({ date: -1, createdAt: -1 }).limit(5),
             Income.aggregate([
@@ -88,7 +101,7 @@ exports.getDashboardData = async (req, res) => {
             ]),
         ]);
 
-        const incomeLast60Days = last60DaysIncomeTransactions.reduce(
+        const incomeLast30Days = last30DaysIncomeTransactions.reduce(
             (sum, transaction) => sum + transaction.amount,
             0
         );
@@ -107,7 +120,11 @@ exports.getDashboardData = async (req, res) => {
                 ...txn.toObject(),
                 type: "expense",
             })),
-        ].sort((a, b) => new Date(b.date) - new Date(a.date));
+        ].sort((a, b) => {
+            const dateDiff = new Date(b.date) - new Date(a.date);
+            if (dateDiff !== 0) return dateDiff;
+            return new Date(b.createdAt || 0) - new Date(a.createdAt || 0);
+        });
 
         // Build last 6 months trend map
         const incomeMonthMap = new Map();
@@ -151,9 +168,9 @@ exports.getDashboardData = async (req, res) => {
                 total: expensesLast30Days,
                 transactions: last30DaysExpenseTransactions,
             },
-            last60DaysIncome: {
-                total: incomeLast60Days,
-                transactions: last60DaysIncomeTransactions,
+            last30DaysIncome: {
+                total: incomeLast30Days,
+                transactions: last30DaysIncomeTransactions,
             },
             recentTransactions: lastTransactions,
             currentMonth: {

@@ -6,6 +6,7 @@ import { formatCurrency, formatDateDisplay } from '../../utils/helper';
 
 const IncomeList = ({
     transactions = [],
+    periodLabel = "",
     onDelete,
     onEdit,
     onDownload,
@@ -24,6 +25,7 @@ const IncomeList = ({
                 <div>
                     <h5 className="text-lg">Income Sources</h5>
                     <p className="text-xs text-gray-400 mt-0.5">
+                        {periodLabel ? `${periodLabel} · ` : ""}
                         {transactions.length} record(s) · Total:{" "}
                         <span className="font-semibold text-gray-700">
                             {formatCurrency(totalFiltered, user?.currency)}

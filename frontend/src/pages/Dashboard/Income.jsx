@@ -1,5 +1,4 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import moment from 'moment';
 import DashboardLayout from '../../components/layouts/DashboardLayout';
 import IncomeOverview from '../../components/Income/IncomeOverview';
 import axiosInstance from '../../utils/axiosInstance';
@@ -10,8 +9,15 @@ import toast from 'react-hot-toast';
 import IncomeList from '../../components/Income/IncomeList';
 import DeleteAlert from '../../components/DeleteAlert';
 import TransactionFilterBar from '../../components/Filters/TransactionFilterBar';
+import PeriodDetailsCard from '../../components/Filters/PeriodDetailsCard';
 import { useUserAuth } from '../../hooks/useUserAuth';
-import { formatDateForInput, getCurrentMonthKey } from '../../utils/helper';
+import {
+    formatDateForInput,
+    formatMonthLabel,
+    getAvailableYears,
+    getCurrentMonthKey,
+    getCurrentYear,
+} from '../../utils/helper';
 import { LuLoaderCircle } from 'react-icons/lu';
 
 const Income = () => {
@@ -31,17 +37,16 @@ const Income = () => {
         data: null,
     });
 
-    // Filters & sorting
+    // Search & Monthly/Yearly Period Views
     const [search, setSearch] = useState("");
-    const [selectedSource, setSelectedSource] = useState("all");
-    const [dateRangePreset, setDateRangePreset] = useState("all");
+    const [viewMode, setViewMode] = useState("all");
     const [selectedMonth, setSelectedMonth] = useState(getCurrentMonthKey());
-    const [startDate, setStartDate] = useState("");
-    const [endDate, setEndDate] = useState("");
-    const [sortBy, setSortBy] = useState("date_desc");
+    const [selectedYear, setSelectedYear] = useState(getCurrentYear());
 
-    const fetchIncomeDetails = useCallback(async () => {
-        setLoading(true);
+    const fetchIncomeDetails = useCallback(async ({ silent = false } = {}) => {
+        if (!silent) {
+            setLoading(true);
+        }
         try {
             const response = await axiosInstance.get(API_PATHS.INCOME.GET_ALL_INCOME);
             if (response.data) {
@@ -49,9 +54,13 @@ const Income = () => {
             }
         } catch (error) {
             console.error("Error fetching income details:", error);
-            toast.error("Failed to fetch income records.");
+            if (!silent) {
+                toast.error("Failed to fetch income records.");
+            }
         } finally {
-            setLoading(false);
+            if (!silent) {
+                setLoading(false);
+            }
         }
     }, []);
 
@@ -59,31 +68,31 @@ const Income = () => {
         fetchIncomeDetails();
     }, [fetchIncomeDetails]);
 
-    const sourceOptions = useMemo(() => {
-        const seen = new Map();
-        incomeData.forEach((item) => {
-            const trimmed = item.source?.trim();
-            if (trimmed) {
-                const key = trimmed.toLowerCase();
-                if (!seen.has(key)) seen.set(key, trimmed);
+    useEffect(() => {
+        const handleVisibilityChange = () => {
+            if (
+                document.visibilityState === "visible" &&
+                !formModal.show &&
+                !openDeleteAlert.show
+            ) {
+                fetchIncomeDetails({ silent: true });
             }
-        });
-        return Array.from(seen.values()).sort((a, b) => a.localeCompare(b));
-    }, [incomeData]);
+        };
+
+        document.addEventListener("visibilitychange", handleVisibilityChange);
+        return () =>
+            document.removeEventListener("visibilitychange", handleVisibilityChange);
+    }, [fetchIncomeDetails, formModal.show, openDeleteAlert.show]);
+
+    const availableYears = useMemo(
+        () => getAvailableYears(incomeData, selectedYear),
+        [incomeData, selectedYear]
+    );
 
     const filteredIncome = useMemo(() => {
         const query = search.trim().toLowerCase();
-        const currentMonth = getCurrentMonthKey();
-        const thirtyDaysAgoKey = moment().subtract(30, "days").format("YYYY-MM-DD");
 
         const filtered = incomeData.filter((item) => {
-            if (
-                selectedSource !== "all" &&
-                item.source?.trim().toLowerCase() !== selectedSource.trim().toLowerCase()
-            ) {
-                return false;
-            }
-
             if (query) {
                 const matchSource = item.source?.toLowerCase().includes(query);
                 const matchNotes = item.notes?.toLowerCase().includes(query);
@@ -92,48 +101,41 @@ const Income = () => {
             }
 
             const itemDateKey = formatDateForInput(item.date);
-            if (dateRangePreset === "this_month") {
-                if (!itemDateKey.startsWith(currentMonth)) return false;
-            } else if (dateRangePreset === "month") {
+            if (viewMode === "month") {
                 if (!itemDateKey.startsWith(selectedMonth)) return false;
-            } else if (dateRangePreset === "last_30") {
-                if (itemDateKey < thirtyDaysAgoKey) return false;
-            } else if (dateRangePreset === "custom") {
-                if (startDate && itemDateKey < startDate) return false;
-                if (endDate && itemDateKey > endDate) return false;
+            } else if (viewMode === "year") {
+                if (!itemDateKey.startsWith(`${selectedYear}-`)) return false;
             }
 
             return true;
         });
 
         return [...filtered].sort((a, b) => {
-            if (sortBy === "date_asc") {
-                return new Date(a.date) - new Date(b.date);
-            }
-            if (sortBy === "amount_desc") {
-                return Number(b.amount) - Number(a.amount);
-            }
-            if (sortBy === "amount_asc") {
-                return Number(a.amount) - Number(b.amount);
-            }
-            return new Date(b.date) - new Date(a.date);
+            const dateDiff = new Date(b.date) - new Date(a.date);
+            if (dateDiff !== 0) return dateDiff;
+            return new Date(b.createdAt || 0) - new Date(a.createdAt || 0);
         });
-    }, [incomeData, search, selectedSource, dateRangePreset, selectedMonth, startDate, endDate, sortBy]);
+    }, [incomeData, search, viewMode, selectedMonth, selectedYear]);
 
-    const hasActiveFilters =
-        Boolean(search.trim()) ||
-        selectedSource !== "all" ||
-        dateRangePreset !== "all" ||
-        sortBy !== "date_desc";
+    const periodLabel =
+        viewMode === "month"
+            ? formatMonthLabel(selectedMonth)
+            : viewMode === "year"
+            ? `Year ${selectedYear}`
+            : "All Time";
+
+    const hasActiveFilters = Boolean(search.trim()) || viewMode !== "all";
 
     const handleResetFilters = () => {
         setSearch("");
-        setSelectedSource("all");
-        setDateRangePreset("all");
+        setViewMode("all");
         setSelectedMonth(getCurrentMonthKey());
-        setStartDate("");
-        setEndDate("");
-        setSortBy("date_desc");
+        setSelectedYear(getCurrentYear());
+    };
+
+    const handleSelectMonthFromYearly = (monthKey) => {
+        setSelectedMonth(monthKey);
+        setViewMode("month");
     };
 
     const handleSaveIncome = async (income) => {
@@ -177,7 +179,21 @@ const Income = () => {
             }
 
             setFormModal({ show: false, data: null });
-            fetchIncomeDetails();
+
+            const savedDateKey = formatDateForInput(date) || date;
+            if (viewMode === "month" && /^\d{4}-\d{2}/.test(savedDateKey)) {
+                const savedMonth = savedDateKey.slice(0, 7);
+                if (savedMonth !== selectedMonth) {
+                    setSelectedMonth(savedMonth);
+                }
+            } else if (viewMode === "year" && /^\d{4}/.test(savedDateKey)) {
+                const savedYear = Number(savedDateKey.slice(0, 4));
+                if (savedYear !== Number(selectedYear)) {
+                    setSelectedYear(savedYear);
+                }
+            }
+
+            await fetchIncomeDetails({ silent: true });
         } catch (error) {
             toast.error(error.response?.data?.message || "Failed to save income");
         } finally {
@@ -191,7 +207,7 @@ const Income = () => {
             await axiosInstance.delete(API_PATHS.INCOME.DELETE_INCOME(id));
             setOpenDeleteAlert({ show: false, data: null });
             toast.success("Income details deleted successfully");
-            fetchIncomeDetails();
+            await fetchIncomeDetails({ silent: true });
         } catch (error) {
             toast.error(error.response?.data?.message || "Failed to delete income");
         } finally {
@@ -203,15 +219,27 @@ const Income = () => {
         if (downloading) return;
         setDownloading(true);
         try {
+            const params = {};
+            if (viewMode === "month") params.month = selectedMonth;
+            if (viewMode === "year") params.year = String(selectedYear);
+            if (search.trim()) params.search = search.trim();
+
             const response = await axiosInstance.get(
                 API_PATHS.INCOME.DOWNLOAD_INCOME,
-                { responseType: "blob" }
+                { params, responseType: "blob" }
             );
+
+            const filename =
+                viewMode === "month"
+                    ? `income_${selectedMonth}.xlsx`
+                    : viewMode === "year"
+                    ? `income_${selectedYear}.xlsx`
+                    : "income_details.xlsx";
 
             const url = window.URL.createObjectURL(new Blob([response.data]));
             const link = document.createElement("a");
             link.href = url;
-            link.setAttribute("download", "income_details.xlsx");
+            link.setAttribute("download", filename);
             document.body.appendChild(link);
             link.click();
             link.parentNode.removeChild(link);
@@ -230,28 +258,34 @@ const Income = () => {
             <div className="my-5 mx-auto space-y-6">
                 <IncomeOverview
                     transactions={filteredIncome}
+                    viewMode={viewMode}
+                    periodLabel={periodLabel}
+                    selectedYear={selectedYear}
                     onAddIncome={() => setFormModal({ show: true, data: null })}
                 />
 
                 <TransactionFilterBar
                     search={search}
                     onSearchChange={setSearch}
-                    selectedCategory={selectedSource}
-                    onCategoryChange={setSelectedSource}
-                    categoryOptions={sourceOptions}
-                    categoryLabel="Source"
-                    dateRangePreset={dateRangePreset}
-                    onDateRangePresetChange={setDateRangePreset}
+                    searchPlaceholder="Search source, notes, payment..."
+                    viewMode={viewMode}
+                    onViewModeChange={setViewMode}
                     selectedMonth={selectedMonth}
                     onSelectedMonthChange={setSelectedMonth}
-                    startDate={startDate}
-                    onStartDateChange={setStartDate}
-                    endDate={endDate}
-                    onEndDateChange={setEndDate}
-                    sortBy={sortBy}
-                    onSortByChange={setSortBy}
+                    selectedYear={selectedYear}
+                    onSelectedYearChange={setSelectedYear}
+                    availableYears={availableYears}
                     hasActiveFilters={hasActiveFilters}
                     onResetFilters={handleResetFilters}
+                />
+
+                <PeriodDetailsCard
+                    type="income"
+                    viewMode={viewMode}
+                    transactions={filteredIncome}
+                    selectedMonth={selectedMonth}
+                    selectedYear={selectedYear}
+                    onSelectMonth={handleSelectMonthFromYearly}
                 />
 
                 {loading && incomeData.length === 0 ? (
@@ -262,6 +296,7 @@ const Income = () => {
                 ) : (
                     <IncomeList
                         transactions={filteredIncome}
+                        periodLabel={periodLabel}
                         onEdit={(incomeItem) =>
                             setFormModal({ show: true, data: incomeItem })
                         }

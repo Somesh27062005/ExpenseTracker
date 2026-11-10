@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import moment from 'moment';
 import { FaRegEye, FaRegEyeSlash } from 'react-icons/fa6';
 
 const Input = ({
@@ -21,9 +22,25 @@ const Input = ({
     const resolvedType =
         type === 'password' ? (showPassword ? 'text' : 'password') : type;
 
+    const formattedDatePreview =
+        type === "date" && typeof value === "string" && /^\d{4}-\d{2}-\d{2}$/.test(value)
+            ? moment.utc(value, "YYYY-MM-DD", true).isValid()
+                ? moment.utc(value, "YYYY-MM-DD").format("Do MMMM YYYY")
+                : ""
+            : "";
+
     return (
         <div>
-            {label && <label className="text-[13px] text-slate-800">{label}</label>}
+            {(label || formattedDatePreview) && (
+                <div className="flex items-center justify-between gap-2 min-h-[20px]">
+                    {label && <label className="text-[13px] text-slate-800">{label}</label>}
+                    {formattedDatePreview && (
+                        <span className="text-[11px] font-medium text-purple-600 truncate">
+                            {formattedDatePreview}
+                        </span>
+                    )}
+                </div>
+            )}
 
             <div className={`input-box ${disabled ? "opacity-70" : ""}`}>
                 <input

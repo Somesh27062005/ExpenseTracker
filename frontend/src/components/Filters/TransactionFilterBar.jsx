@@ -1,136 +1,100 @@
 import React from 'react';
 import { LuSearch, LuFilterX } from 'react-icons/lu';
-import { SORT_OPTIONS } from '../../utils/data';
 import MonthPicker from '../Inputs/MonthPicker';
-import { formatMonthLabel, getCurrentMonthKey } from '../../utils/helper';
+import YearPicker from '../Inputs/YearPicker';
+import { getCurrentMonthKey, getCurrentYear } from '../../utils/helper';
+
+const VIEW_MODES = [
+    { key: "all", label: "All" },
+    { key: "month", label: "Monthly" },
+    { key: "year", label: "Yearly" },
+];
 
 const TransactionFilterBar = ({
     search = "",
     onSearchChange,
-    selectedCategory = "all",
-    onCategoryChange,
-    categoryOptions = [],
-    categoryLabel = "Category",
-    dateRangePreset = "all",
-    onDateRangePresetChange,
+    searchPlaceholder = "Search notes, payment method...",
+    viewMode = "all",
+    onViewModeChange,
     selectedMonth,
     onSelectedMonthChange,
-    startDate = "",
-    onStartDateChange,
-    endDate = "",
-    onEndDateChange,
-    sortBy = "date_desc",
-    onSortByChange,
+    selectedYear,
+    onSelectedYearChange,
+    availableYears = [],
     hasActiveFilters = false,
     onResetFilters,
 }) => {
     return (
         <div className="card p-4 md:p-5">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
                 {/* Search Input */}
-                <div className="flex items-center gap-2 bg-slate-50 border border-gray-200 rounded-lg px-3 py-2">
+                <div className="flex items-center gap-2 bg-slate-50 border border-gray-200 rounded-lg px-3 py-2 flex-1 min-w-0">
                     <LuSearch className="text-gray-400 shrink-0" />
                     <input
                         type="text"
                         value={search}
                         onChange={(e) => onSearchChange(e.target.value)}
-                        placeholder={`Search ${categoryLabel.toLowerCase()}, notes...`}
+                        placeholder={searchPlaceholder}
                         className="w-full bg-transparent text-sm text-gray-800 outline-none placeholder:text-gray-400"
                     />
                 </div>
 
-                {/* Category / Source Filter */}
-                <select
-                    value={selectedCategory}
-                    onChange={(e) => onCategoryChange(e.target.value)}
-                    className="bg-slate-50 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 outline-none cursor-pointer"
-                >
-                    <option value="all">All {categoryLabel}s</option>
-                    {categoryOptions.map((option) => (
-                        <option key={option} value={option}>
-                            {option}
-                        </option>
-                    ))}
-                </select>
-
-                {/* Date Preset Filter */}
-                <select
-                    value={dateRangePreset}
-                    onChange={(e) => onDateRangePresetChange(e.target.value)}
-                    className="bg-slate-50 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 outline-none cursor-pointer"
-                >
-                    <option value="all">All Dates</option>
-                    <option value="this_month">
-                        This Month ({formatMonthLabel(getCurrentMonthKey())})
-                    </option>
-                    <option value="month">Filter by Month</option>
-                    <option value="last_30">Last 30 Days</option>
-                    <option value="custom">Custom Range</option>
-                </select>
-
-                {/* Sort Select + Reset */}
-                <div className="flex items-center gap-2">
-                    <select
-                        value={sortBy}
-                        onChange={(e) => onSortByChange(e.target.value)}
-                        className="w-full bg-slate-50 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 outline-none cursor-pointer"
+                {/* Period Mode & Picker Controls */}
+                <div className="flex flex-wrap items-center gap-2.5">
+                    <div
+                        role="group"
+                        aria-label="Period view mode"
+                        className="inline-flex items-center bg-slate-100 border border-gray-200/80 rounded-lg p-1"
                     >
-                        {SORT_OPTIONS.map((opt) => (
-                            <option key={opt.value} value={opt.value}>
-                                {opt.label}
-                            </option>
-                        ))}
-                    </select>
+                        {VIEW_MODES.map((mode) => {
+                            const isActive = viewMode === mode.key;
+                            return (
+                                <button
+                                    key={mode.key}
+                                    type="button"
+                                    onClick={() => onViewModeChange(mode.key)}
+                                    className={`px-3.5 py-1.5 text-xs sm:text-sm rounded-md cursor-pointer transition-all ${
+                                        isActive
+                                            ? "bg-white text-purple-700 font-medium shadow-xs"
+                                            : "text-gray-600 hover:text-gray-900"
+                                    }`}
+                                >
+                                    {mode.label}
+                                </button>
+                            );
+                        })}
+                    </div>
+
+                    {viewMode === "month" && onSelectedMonthChange && (
+                        <MonthPicker
+                            value={selectedMonth || getCurrentMonthKey()}
+                            onChange={onSelectedMonthChange}
+                            align="right"
+                        />
+                    )}
+
+                    {viewMode === "year" && onSelectedYearChange && (
+                        <YearPicker
+                            value={selectedYear || getCurrentYear()}
+                            onChange={onSelectedYearChange}
+                            yearsWithData={availableYears}
+                            align="right"
+                        />
+                    )}
 
                     {hasActiveFilters && (
                         <button
                             type="button"
                             onClick={onResetFilters}
                             className="p-2.5 rounded-lg border border-gray-200 bg-gray-50 hover:bg-red-50 hover:text-red-500 text-gray-600 cursor-pointer shrink-0 transition-colors"
-                            title="Reset filters"
-                            aria-label="Reset filters"
+                            title="Reset view & search"
+                            aria-label="Reset view & search"
                         >
                             <LuFilterX className="text-base" />
                         </button>
                     )}
                 </div>
             </div>
-
-            {dateRangePreset === "month" && onSelectedMonthChange && (
-                <div className="flex flex-col sm:flex-row sm:items-center gap-3 mt-3 pt-3 border-t border-gray-100">
-                    <span className="text-xs font-medium text-gray-500">
-                        Select Month:
-                    </span>
-                    <MonthPicker
-                        value={selectedMonth || getCurrentMonthKey()}
-                        onChange={onSelectedMonthChange}
-                        align="left"
-                    />
-                </div>
-            )}
-
-            {dateRangePreset === "custom" && (
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-3 pt-3 border-t border-gray-100">
-                    <div className="flex items-center gap-2">
-                        <label className="text-xs text-gray-500 w-20 shrink-0">From Date</label>
-                        <input
-                            type="date"
-                            value={startDate}
-                            onChange={(e) => onStartDateChange(e.target.value)}
-                            className="w-full bg-slate-50 border border-gray-200 rounded-lg px-3 py-1.5 text-sm text-gray-700 outline-none"
-                        />
-                    </div>
-                    <div className="flex items-center gap-2">
-                        <label className="text-xs text-gray-500 w-20 shrink-0">To Date</label>
-                        <input
-                            type="date"
-                            value={endDate}
-                            onChange={(e) => onEndDateChange(e.target.value)}
-                            className="w-full bg-slate-50 border border-gray-200 rounded-lg px-3 py-1.5 text-sm text-gray-700 outline-none"
-                        />
-                    </div>
-                </div>
-            )}
         </div>
     );
 };

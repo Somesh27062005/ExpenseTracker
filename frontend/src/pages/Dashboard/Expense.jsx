@@ -1,5 +1,4 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import moment from 'moment';
 import { useUserAuth } from '../../hooks/useUserAuth';
 import DashboardLayout from '../../components/layouts/DashboardLayout';
 import axiosInstance from '../../utils/axiosInstance';
@@ -11,7 +10,14 @@ import Modal from '../../components/Modal';
 import ExpenseList from '../../components/Expense/ExpenseList';
 import DeleteAlert from '../../components/DeleteAlert';
 import TransactionFilterBar from '../../components/Filters/TransactionFilterBar';
-import { formatDateForInput, getCurrentMonthKey } from '../../utils/helper';
+import PeriodDetailsCard from '../../components/Filters/PeriodDetailsCard';
+import {
+    formatDateForInput,
+    formatMonthLabel,
+    getAvailableYears,
+    getCurrentMonthKey,
+    getCurrentYear,
+} from '../../utils/helper';
 import { LuLoaderCircle } from 'react-icons/lu';
 
 const Expense = () => {
@@ -31,17 +37,16 @@ const Expense = () => {
         data: null,
     });
 
-    // Filters & sorting
+    // Search & Monthly/Yearly Period Views
     const [search, setSearch] = useState("");
-    const [selectedCategory, setSelectedCategory] = useState("all");
-    const [dateRangePreset, setDateRangePreset] = useState("all");
+    const [viewMode, setViewMode] = useState("all");
     const [selectedMonth, setSelectedMonth] = useState(getCurrentMonthKey());
-    const [startDate, setStartDate] = useState("");
-    const [endDate, setEndDate] = useState("");
-    const [sortBy, setSortBy] = useState("date_desc");
+    const [selectedYear, setSelectedYear] = useState(getCurrentYear());
 
-    const fetchExpenseDetails = useCallback(async () => {
-        setLoading(true);
+    const fetchExpenseDetails = useCallback(async ({ silent = false } = {}) => {
+        if (!silent) {
+            setLoading(true);
+        }
         try {
             const response = await axiosInstance.get(API_PATHS.EXPENSE.GET_ALL_EXPENSE);
             if (response.data) {
@@ -49,9 +54,13 @@ const Expense = () => {
             }
         } catch (error) {
             console.error("Error fetching expense details:", error);
-            toast.error("Failed to fetch expense records.");
+            if (!silent) {
+                toast.error("Failed to fetch expense records.");
+            }
         } finally {
-            setLoading(false);
+            if (!silent) {
+                setLoading(false);
+            }
         }
     }, []);
 
@@ -59,31 +68,31 @@ const Expense = () => {
         fetchExpenseDetails();
     }, [fetchExpenseDetails]);
 
-    const categoryOptions = useMemo(() => {
-        const seen = new Map();
-        expenseData.forEach((item) => {
-            const trimmed = item.category?.trim();
-            if (trimmed) {
-                const key = trimmed.toLowerCase();
-                if (!seen.has(key)) seen.set(key, trimmed);
+    useEffect(() => {
+        const handleVisibilityChange = () => {
+            if (
+                document.visibilityState === "visible" &&
+                !formModal.show &&
+                !openDeleteAlert.show
+            ) {
+                fetchExpenseDetails({ silent: true });
             }
-        });
-        return Array.from(seen.values()).sort((a, b) => a.localeCompare(b));
-    }, [expenseData]);
+        };
+
+        document.addEventListener("visibilitychange", handleVisibilityChange);
+        return () =>
+            document.removeEventListener("visibilitychange", handleVisibilityChange);
+    }, [fetchExpenseDetails, formModal.show, openDeleteAlert.show]);
+
+    const availableYears = useMemo(
+        () => getAvailableYears(expenseData, selectedYear),
+        [expenseData, selectedYear]
+    );
 
     const filteredExpenses = useMemo(() => {
         const query = search.trim().toLowerCase();
-        const currentMonth = getCurrentMonthKey();
-        const thirtyDaysAgoKey = moment().subtract(30, "days").format("YYYY-MM-DD");
 
         const filtered = expenseData.filter((item) => {
-            if (
-                selectedCategory !== "all" &&
-                item.category?.trim().toLowerCase() !== selectedCategory.trim().toLowerCase()
-            ) {
-                return false;
-            }
-
             if (query) {
                 const matchCategory = item.category?.toLowerCase().includes(query);
                 const matchNotes = item.notes?.toLowerCase().includes(query);
@@ -92,48 +101,41 @@ const Expense = () => {
             }
 
             const itemDateKey = formatDateForInput(item.date);
-            if (dateRangePreset === "this_month") {
-                if (!itemDateKey.startsWith(currentMonth)) return false;
-            } else if (dateRangePreset === "month") {
+            if (viewMode === "month") {
                 if (!itemDateKey.startsWith(selectedMonth)) return false;
-            } else if (dateRangePreset === "last_30") {
-                if (itemDateKey < thirtyDaysAgoKey) return false;
-            } else if (dateRangePreset === "custom") {
-                if (startDate && itemDateKey < startDate) return false;
-                if (endDate && itemDateKey > endDate) return false;
+            } else if (viewMode === "year") {
+                if (!itemDateKey.startsWith(`${selectedYear}-`)) return false;
             }
 
             return true;
         });
 
         return [...filtered].sort((a, b) => {
-            if (sortBy === "date_asc") {
-                return new Date(a.date) - new Date(b.date);
-            }
-            if (sortBy === "amount_desc") {
-                return Number(b.amount) - Number(a.amount);
-            }
-            if (sortBy === "amount_asc") {
-                return Number(a.amount) - Number(b.amount);
-            }
-            return new Date(b.date) - new Date(a.date);
+            const dateDiff = new Date(b.date) - new Date(a.date);
+            if (dateDiff !== 0) return dateDiff;
+            return new Date(b.createdAt || 0) - new Date(a.createdAt || 0);
         });
-    }, [expenseData, search, selectedCategory, dateRangePreset, selectedMonth, startDate, endDate, sortBy]);
+    }, [expenseData, search, viewMode, selectedMonth, selectedYear]);
 
-    const hasActiveFilters =
-        Boolean(search.trim()) ||
-        selectedCategory !== "all" ||
-        dateRangePreset !== "all" ||
-        sortBy !== "date_desc";
+    const periodLabel =
+        viewMode === "month"
+            ? formatMonthLabel(selectedMonth)
+            : viewMode === "year"
+            ? `Year ${selectedYear}`
+            : "All Time";
+
+    const hasActiveFilters = Boolean(search.trim()) || viewMode !== "all";
 
     const handleResetFilters = () => {
         setSearch("");
-        setSelectedCategory("all");
-        setDateRangePreset("all");
+        setViewMode("all");
         setSelectedMonth(getCurrentMonthKey());
-        setStartDate("");
-        setEndDate("");
-        setSortBy("date_desc");
+        setSelectedYear(getCurrentYear());
+    };
+
+    const handleSelectMonthFromYearly = (monthKey) => {
+        setSelectedMonth(monthKey);
+        setViewMode("month");
     };
 
     const handleSaveExpense = async (expense) => {
@@ -177,7 +179,21 @@ const Expense = () => {
             }
 
             setFormModal({ show: false, data: null });
-            fetchExpenseDetails();
+
+            const savedDateKey = formatDateForInput(date) || date;
+            if (viewMode === "month" && /^\d{4}-\d{2}/.test(savedDateKey)) {
+                const savedMonth = savedDateKey.slice(0, 7);
+                if (savedMonth !== selectedMonth) {
+                    setSelectedMonth(savedMonth);
+                }
+            } else if (viewMode === "year" && /^\d{4}/.test(savedDateKey)) {
+                const savedYear = Number(savedDateKey.slice(0, 4));
+                if (savedYear !== Number(selectedYear)) {
+                    setSelectedYear(savedYear);
+                }
+            }
+
+            await fetchExpenseDetails({ silent: true });
         } catch (error) {
             toast.error(error.response?.data?.message || "Failed to save expense");
         } finally {
@@ -191,7 +207,7 @@ const Expense = () => {
             await axiosInstance.delete(API_PATHS.EXPENSE.DELETE_EXPENSE(id));
             setOpenDeleteAlert({ show: false, data: null });
             toast.success("Expense details deleted successfully");
-            fetchExpenseDetails();
+            await fetchExpenseDetails({ silent: true });
         } catch (error) {
             toast.error(error.response?.data?.message || "Failed to delete expense");
         } finally {
@@ -203,15 +219,27 @@ const Expense = () => {
         if (downloading) return;
         setDownloading(true);
         try {
+            const params = {};
+            if (viewMode === "month") params.month = selectedMonth;
+            if (viewMode === "year") params.year = String(selectedYear);
+            if (search.trim()) params.search = search.trim();
+
             const response = await axiosInstance.get(
                 API_PATHS.EXPENSE.DOWNLOAD_EXPENSE,
-                { responseType: "blob" }
+                { params, responseType: "blob" }
             );
+
+            const filename =
+                viewMode === "month"
+                    ? `expense_${selectedMonth}.xlsx`
+                    : viewMode === "year"
+                    ? `expense_${selectedYear}.xlsx`
+                    : "expense_details.xlsx";
 
             const url = window.URL.createObjectURL(new Blob([response.data]));
             const link = document.createElement("a");
             link.href = url;
-            link.setAttribute("download", "expense_details.xlsx");
+            link.setAttribute("download", filename);
             document.body.appendChild(link);
             link.click();
             link.parentNode.removeChild(link);
@@ -230,28 +258,34 @@ const Expense = () => {
             <div className="my-5 mx-auto space-y-6">
                 <ExpenseOverview
                     transactions={filteredExpenses}
-                    onExpenseIncome={() => setFormModal({ show: true, data: null })}
+                    viewMode={viewMode}
+                    periodLabel={periodLabel}
+                    selectedYear={selectedYear}
+                    onAddExpense={() => setFormModal({ show: true, data: null })}
                 />
 
                 <TransactionFilterBar
                     search={search}
                     onSearchChange={setSearch}
-                    selectedCategory={selectedCategory}
-                    onCategoryChange={setSelectedCategory}
-                    categoryOptions={categoryOptions}
-                    categoryLabel="Category"
-                    dateRangePreset={dateRangePreset}
-                    onDateRangePresetChange={setDateRangePreset}
+                    searchPlaceholder="Search category, notes, payment..."
+                    viewMode={viewMode}
+                    onViewModeChange={setViewMode}
                     selectedMonth={selectedMonth}
                     onSelectedMonthChange={setSelectedMonth}
-                    startDate={startDate}
-                    onStartDateChange={setStartDate}
-                    endDate={endDate}
-                    onEndDateChange={setEndDate}
-                    sortBy={sortBy}
-                    onSortByChange={setSortBy}
+                    selectedYear={selectedYear}
+                    onSelectedYearChange={setSelectedYear}
+                    availableYears={availableYears}
                     hasActiveFilters={hasActiveFilters}
                     onResetFilters={handleResetFilters}
+                />
+
+                <PeriodDetailsCard
+                    type="expense"
+                    viewMode={viewMode}
+                    transactions={filteredExpenses}
+                    selectedMonth={selectedMonth}
+                    selectedYear={selectedYear}
+                    onSelectMonth={handleSelectMonthFromYearly}
                 />
 
                 {loading && expenseData.length === 0 ? (
@@ -262,6 +296,7 @@ const Expense = () => {
                 ) : (
                     <ExpenseList
                         transactions={filteredExpenses}
+                        periodLabel={periodLabel}
                         onEdit={(expenseItem) =>
                             setFormModal({ show: true, data: expenseItem })
                         }

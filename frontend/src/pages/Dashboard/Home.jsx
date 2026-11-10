@@ -12,12 +12,9 @@ import {
 } from '../../utils/helper';
 import RecentTransactions from '../../components/Dashboard/RecentTransactions';
 import FinanceOverview from '../../components/Dashboard/FinanceOverview';
-import ExpenseTransactions from '../../components/Dashboard/ExpenseTransactions';
 import Last30DaysExpenses from '../../components/Dashboard/Last30DaysExpenses';
 import RecentIncomeWithChart from '../../components/Charts/RecentIncomeWithChart';
-import RecentIncome from '../../components/Dashboard/RecentIncome';
 import IncomeVsExpenseChart from '../../components/Charts/IncomeVsExpenseChart';
-import CategoryBreakdownChart from '../../components/Dashboard/CategoryBreakdownChart';
 import { UserContext } from '../../context/UserContext';
 import toast from 'react-hot-toast';
 
@@ -37,23 +34,44 @@ const Home = () => {
     const [dashboardData, setDashboardData] = useState(null);
     const [loading, setLoading] = useState(false);
 
-    const fetchDashboardData = useCallback(async () => {
-        setLoading(true);
+    const fetchDashboardData = useCallback(async ({ silent = false } = {}) => {
+        if (!silent) {
+            setLoading(true);
+        }
         try {
-            const response = await axiosInstance.get(API_PATHS.DASHBOARD.GET_DATA);
+            const response = await axiosInstance.get(API_PATHS.DASHBOARD.GET_DATA, {
+                params: { month: getCurrentMonthKey() },
+            });
             if (response.data) {
                 setDashboardData(response.data);
             }
         } catch (error) {
             console.error("Failed to fetch dashboard data:", error);
-            toast.error("Could not load dashboard metrics.");
+            if (!silent) {
+                toast.error("Could not load dashboard metrics.");
+            }
         } finally {
-            setLoading(false);
+            if (!silent) {
+                setLoading(false);
+            }
         }
     }, []);
 
     useEffect(() => {
         fetchDashboardData();
+
+        const handleRefresh = () => {
+            if (document.visibilityState === "visible") {
+                fetchDashboardData({ silent: true });
+            }
+        };
+
+        window.addEventListener("focus", handleRefresh);
+        document.addEventListener("visibilitychange", handleRefresh);
+        return () => {
+            window.removeEventListener("focus", handleRefresh);
+            document.removeEventListener("visibilitychange", handleRefresh);
+        };
     }, [fetchDashboardData]);
 
     const currency = user?.currency || "USD";
@@ -119,19 +137,10 @@ const Home = () => {
                             />
                         </div>
 
-                        {/* 6-Month Cashflow & Category Spending */}
-                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                            <IncomeVsExpenseChart data={dashboardData?.monthlyTrend || []} />
+                        {/* 6-Month Cashflow */}
+                        <IncomeVsExpenseChart data={dashboardData?.monthlyTrend || []} />
 
-                            <CategoryBreakdownChart
-                                data={dashboardData?.categorySpending || []}
-                                totalSpent={currentMonth.expenses || 0}
-                                monthLabel={currentMonthLabel}
-                                onViewExpenses={() => navigate("/expense")}
-                            />
-                        </div>
-
-                        {/* Core Dashboard Cards */}
+                        {/* Recent Transactions & Financial Overview */}
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <RecentTransactions
                                 transactions={dashboardData?.recentTransactions || []}
@@ -143,24 +152,19 @@ const Home = () => {
                                 totalIncome={dashboardData?.totalIncome || 0}
                                 totalExpense={dashboardData?.totalExpenses || 0}
                             />
+                        </div>
 
-                            <ExpenseTransactions
-                                transactions={dashboardData?.last30DaysExpenses?.transactions || []}
-                                onSeeMore={() => navigate("/expense")}
+                        {/* Last 30 Days Income & Expenses */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <RecentIncomeWithChart
+                                data={dashboardData?.last30DaysIncome?.transactions || []}
+                                totalIncome={dashboardData?.last30DaysIncome?.total || 0}
+                                onSeeMore={() => navigate("/income")}
                             />
 
                             <Last30DaysExpenses
                                 data={dashboardData?.last30DaysExpenses?.transactions || []}
-                            />
-
-                            <RecentIncomeWithChart
-                                data={dashboardData?.last60DaysIncome?.transactions || []}
-                                totalIncome={dashboardData?.totalIncome || 0}
-                            />
-
-                            <RecentIncome
-                                transactions={dashboardData?.last60DaysIncome?.transactions || []}
-                                onSeeMore={() => navigate("/income")}
+                                onSeeMore={() => navigate("/expense")}
                             />
                         </div>
                     </>

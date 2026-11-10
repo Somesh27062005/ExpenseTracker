@@ -136,7 +136,29 @@ exports.deleteExpense=async (req,res) => {
 exports.downloadExpenseExcel=async (req,res) => {
     const userId=req.user.id;
     try{
-        const expense=await Expense.find({userId}).sort({date:-1});
+        const {month,year,search}=req.query;
+        const query={userId};
+
+        if(typeof month==="string" && /^\d{4}-(0[1-9]|1[0-2])$/.test(month.trim())){
+            const [y,m]=month.trim().split("-").map(Number);
+            query.date={
+                $gte:new Date(Date.UTC(y,m-1,1)),
+                $lt:new Date(Date.UTC(y,m,1)),
+            };
+        } else if(typeof year==="string" && /^\d{4}$/.test(year.trim())){
+            const y=Number(year.trim());
+            query.date={
+                $gte:new Date(Date.UTC(y,0,1)),
+                $lt:new Date(Date.UTC(y+1,0,1)),
+            };
+        }
+
+        if(search && search.trim()){
+            const safeSearch=new RegExp(search.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), "i");
+            query.$or=[{category:safeSearch},{notes:safeSearch},{paymentMethod:safeSearch}];
+        }
+
+        const expense=await Expense.find(query).sort({date:-1,createdAt:-1});
 
         //Prepare data for Excel
         const data=expense.map((item) => ({

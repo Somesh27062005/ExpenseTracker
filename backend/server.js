@@ -10,6 +10,7 @@ const dashboardRoutes = require("./routes/dashboardRoutes");
 
 const app = express();
 app.set("trust proxy", 1);
+app.disable("etag");
 
 // Middleware to handle CORS
 app.use(
@@ -21,6 +22,14 @@ app.use(
 );
 
 app.use(express.json());
+
+// Prevent browser/proxy caching of dynamic API responses
+app.use("/api", (req, res, next) => {
+    res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, private");
+    res.setHeader("Pragma", "no-cache");
+    res.setHeader("Expires", "0");
+    next();
+});
 
 connectDB();
 

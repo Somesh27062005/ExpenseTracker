@@ -1,8 +1,8 @@
 import React, { useContext, useEffect, useRef, useState } from 'react';
 import {
     LuUtensils,
-    LuTrendingUp,
-    LuTrendingDown,
+    LuWalletMinimal,
+    LuHandCoins,
     LuTrash2,
     LuPencil,
 } from 'react-icons/lu';
@@ -116,7 +116,11 @@ const TransactionInfoCard = ({
                         <h6 className="text-xs font-medium whitespace-nowrap">
                             {isIncome ? "+" : "-"} {formatCurrency(amount, user?.currency)}
                         </h6>
-                        {isIncome ? <LuTrendingUp /> : <LuTrendingDown />}
+                        {isIncome ? (
+                            <LuWalletMinimal className="text-sm shrink-0" />
+                        ) : (
+                            <LuHandCoins className="text-sm shrink-0" />
+                        )}
                     </div>
                 </div>
             </div>

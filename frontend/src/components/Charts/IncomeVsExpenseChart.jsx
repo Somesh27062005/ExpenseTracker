@@ -18,7 +18,9 @@ const TrendTooltip = ({ active, payload, label, currency }) => {
         const net = (row?.income || 0) - (row?.expense || 0);
         return (
             <div className="bg-white shadow-md rounded-lg p-3 border border-gray-200 text-xs space-y-1">
-                <p className="font-semibold text-gray-800 mb-1">{label}</p>
+                <p className="font-semibold text-gray-800 mb-1">
+                    {row?.monthFull || label}
+                </p>
                 <p className="text-purple-600 font-medium">
                     Income: {formatCurrency(row?.income || 0, currency)}
                 </p>

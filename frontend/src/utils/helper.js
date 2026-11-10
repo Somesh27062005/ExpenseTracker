@@ -62,7 +62,7 @@ export const formatCurrency = (amount, currencyCode = "USD") => {
     return isNegative ? `-${symbol}${formattedNumber}` : `${symbol}${formattedNumber}`;
 };
 
-export const formatDateDisplay = (dateValue, formatStr = "Do MMM YYYY") => {
+export const formatDateDisplay = (dateValue, formatStr = "Do MMMM YYYY") => {
     if (!dateValue) return "";
     return moment.utc(dateValue).format(formatStr);
 };

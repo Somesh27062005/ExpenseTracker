@@ -12,7 +12,12 @@ const BAR_COLORS = [
     "bg-amber-500",
 ];
 
-const CategoryBreakdownChart = ({ data = [], totalSpent = 0, onViewExpenses }) => {
+const CategoryBreakdownChart = ({
+    data = [],
+    totalSpent = 0,
+    monthLabel = "",
+    onViewExpenses,
+}) => {
     const { user } = useContext(UserContext);
 
     const computedTotal =
@@ -26,7 +31,9 @@ const CategoryBreakdownChart = ({ data = [], totalSpent = 0, onViewExpenses }) =
                 <div>
                     <h5 className="text-lg">Monthly Category Breakdown</h5>
                     <p className="text-xs text-gray-400 mt-0.5">
-                        Top spending categories this month
+                        {monthLabel
+                            ? `Top spending categories in ${monthLabel}`
+                            : "Top spending categories this month"}
                     </p>
                 </div>
 
@@ -39,7 +46,9 @@ const CategoryBreakdownChart = ({ data = [], totalSpent = 0, onViewExpenses }) =
 
             {!data || data.length === 0 ? (
                 <div className="h-[260px] flex items-center justify-center text-sm text-gray-400 text-center">
-                    No expenses logged this month yet.
+                    {monthLabel
+                        ? `No expenses logged in ${monthLabel} yet.`
+                        : "No expenses logged this month yet."}
                 </div>
             ) : (
                 <div className="space-y-4 mt-4">

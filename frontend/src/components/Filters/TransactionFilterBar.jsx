@@ -2,7 +2,7 @@ import React from 'react';
 import { LuSearch, LuFilterX } from 'react-icons/lu';
 import { SORT_OPTIONS } from '../../utils/data';
 import MonthPicker from '../Inputs/MonthPicker';
-import { getCurrentMonthKey } from '../../utils/helper';
+import { formatMonthLabel, getCurrentMonthKey } from '../../utils/helper';
 
 const TransactionFilterBar = ({
     search = "",
@@ -60,7 +60,9 @@ const TransactionFilterBar = ({
                     className="bg-slate-50 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 outline-none cursor-pointer"
                 >
                     <option value="all">All Dates</option>
-                    <option value="this_month">This Month</option>
+                    <option value="this_month">
+                        This Month ({formatMonthLabel(getCurrentMonthKey())})
+                    </option>
                     <option value="month">Filter by Month</option>
                     <option value="last_30">Last 30 Days</option>
                     <option value="custom">Custom Range</option>

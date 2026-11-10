@@ -3,6 +3,10 @@ const Expense = require("../models/Expense");
 const { Types } = require("mongoose");
 
 const MONTH_NAMES = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+const FULL_MONTH_NAMES = [
+    "January", "February", "March", "April", "May", "June",
+    "July", "August", "September", "October", "November", "December",
+];
 
 // Dashboard Data
 exports.getDashboardData = async (req, res) => {
@@ -125,6 +129,7 @@ exports.getDashboardData = async (req, res) => {
             monthlyTrend.push({
                 monthKey: key,
                 month: MONTH_NAMES[d.getUTCMonth()],
+                monthFull: `${FULL_MONTH_NAMES[d.getUTCMonth()]} ${d.getUTCFullYear()}`,
                 income: incomeMonthMap.get(key) || 0,
                 expense: expenseMonthMap.get(key) || 0,
             });
@@ -153,6 +158,7 @@ exports.getDashboardData = async (req, res) => {
             recentTransactions: lastTransactions,
             currentMonth: {
                 month: currentMonthKey,
+                monthLabel: `${FULL_MONTH_NAMES[currentMonthIndex]} ${currentYear}`,
                 start: currentMonthStart,
                 income: currentMonthIncome,
                 expenses: currentMonthExpenses,

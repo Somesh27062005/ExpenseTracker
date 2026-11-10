@@ -5,7 +5,11 @@ import { useNavigate } from 'react-router-dom';
 import { API_PATHS } from '../../utils/apiPaths';
 import axiosInstance from '../../utils/axiosInstance';
 import InfoCard from '../../components/Cards/InfoCard';
-import { formatCurrency } from '../../utils/helper';
+import {
+    formatCurrency,
+    formatMonthLabel,
+    getCurrentMonthKey,
+} from '../../utils/helper';
 import RecentTransactions from '../../components/Dashboard/RecentTransactions';
 import FinanceOverview from '../../components/Dashboard/FinanceOverview';
 import ExpenseTransactions from '../../components/Dashboard/ExpenseTransactions';
@@ -20,7 +24,6 @@ import toast from 'react-hot-toast';
 import {
     LuHandCoins,
     LuWalletMinimal,
-    LuPiggyBank,
     LuLoaderCircle,
 } from 'react-icons/lu';
 import { IoMdCard } from 'react-icons/io';
@@ -56,11 +59,13 @@ const Home = () => {
     const currency = user?.currency || "USD";
     const currentMonth = dashboardData?.currentMonth || {
         month: "",
+        monthLabel: "",
         income: 0,
         expenses: 0,
-        savings: 0,
-        savingsRate: 0,
     };
+    const currentMonthLabel =
+        currentMonth.monthLabel ||
+        formatMonthLabel(currentMonth.month || getCurrentMonthKey());
 
     return (
         <DashboardLayout activeMenu="Dashboard">
@@ -75,7 +80,7 @@ const Home = () => {
                         <span>
                             {loading
                                 ? "Refreshing your financial overview..."
-                                : "Here is your financial summary and cashflow health."}
+                                : `Financial overview for ${currentMonthLabel}.`}
                         </span>
                     </p>
                 </div>
@@ -87,86 +92,31 @@ const Home = () => {
                     </div>
                 ) : (
                     <>
-                        {/* All-Time KPI Cards */}
+                        {/* Summary KPI Cards */}
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                             <InfoCard
                                 icon={<IoMdCard />}
                                 label="Total Balance"
                                 value={formatCurrency(dashboardData?.totalBalance || 0, currency)}
+                                subtext="Overall balance"
                                 color="bg-primary"
                             />
 
                             <InfoCard
                                 icon={<LuWalletMinimal />}
-                                label="Total Income"
-                                value={formatCurrency(dashboardData?.totalIncome || 0, currency)}
-                                color="bg-orange-500"
+                                label="This Month Income"
+                                value={formatCurrency(currentMonth.income, currency)}
+                                subtext={currentMonthLabel}
+                                color="bg-emerald-500"
                             />
 
                             <InfoCard
                                 icon={<LuHandCoins />}
-                                label="Total Expense"
-                                value={formatCurrency(dashboardData?.totalExpenses || 0, currency)}
+                                label="This Month Expenses"
+                                value={formatCurrency(currentMonth.expenses, currency)}
+                                subtext={currentMonthLabel}
                                 color="bg-red-500"
                             />
-                        </div>
-
-                        {/* Current Month Snapshot */}
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            <div className="card p-4 flex items-center justify-between">
-                                <div>
-                                    <p className="text-xs text-gray-500">
-                                        This Month Income {currentMonth.month ? `(${currentMonth.month})` : ""}
-                                    </p>
-                                    <p className="text-lg font-semibold text-emerald-600 mt-1">
-                                        {formatCurrency(currentMonth.income, currency)}
-                                    </p>
-                                </div>
-                                <div className="w-10 h-10 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center">
-                                    <LuWalletMinimal className="text-lg" />
-                                </div>
-                            </div>
-
-                            <div className="card p-4 flex items-center justify-between">
-                                <div>
-                                    <p className="text-xs text-gray-500">
-                                        This Month Expenses {currentMonth.month ? `(${currentMonth.month})` : ""}
-                                    </p>
-                                    <p className="text-lg font-semibold text-red-500 mt-1">
-                                        {formatCurrency(currentMonth.expenses, currency)}
-                                    </p>
-                                </div>
-                                <div className="w-10 h-10 rounded-full bg-red-50 text-red-500 flex items-center justify-center">
-                                    <LuHandCoins className="text-lg" />
-                                </div>
-                            </div>
-
-                            <div className="card p-4 flex items-center justify-between">
-                                <div>
-                                    <p className="text-xs text-gray-500">This Month Net Savings</p>
-                                    <div className="flex items-center gap-2 mt-1">
-                                        <p
-                                            className={`text-lg font-semibold ${
-                                                currentMonth.savings >= 0 ? "text-gray-900" : "text-red-500"
-                                            }`}
-                                        >
-                                            {formatCurrency(currentMonth.savings, currency)}
-                                        </p>
-                                        <span
-                                            className={`text-[11px] font-medium px-2 py-0.5 rounded-full ${
-                                                currentMonth.savingsRate >= 0
-                                                    ? "bg-purple-50 text-purple-700"
-                                                    : "bg-red-50 text-red-600"
-                                            }`}
-                                        >
-                                            {currentMonth.savingsRate}% saved
-                                        </span>
-                                    </div>
-                                </div>
-                                <div className="w-10 h-10 rounded-full bg-purple-50 text-primary flex items-center justify-center">
-                                    <LuPiggyBank className="text-lg" />
-                                </div>
-                            </div>
                         </div>
 
                         {/* 6-Month Cashflow & Category Spending */}
@@ -176,6 +126,7 @@ const Home = () => {
                             <CategoryBreakdownChart
                                 data={dashboardData?.categorySpending || []}
                                 totalSpent={currentMonth.expenses || 0}
+                                monthLabel={currentMonthLabel}
                                 onViewExpenses={() => navigate("/expense")}
                             />
                         </div>

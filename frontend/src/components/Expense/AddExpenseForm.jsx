@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import Input from '../Inputs/Input';
 import PaymentMethodSelect from '../Inputs/PaymentMethodSelect';
 import EmojiPickerPopup from '../EmojiPickerPopup';
-import { EXPENSE_CATEGORIES } from '../../utils/data';
 import { formatDateForInput, getTodayInputDate } from '../../utils/helper';
 import { LuLoaderCircle } from 'react-icons/lu';
 
@@ -33,27 +32,6 @@ const AddExpenseForm = ({ onAddExpense, initialData = null, isSubmitting = false
                 icon={expense.icon}
                 onSelect={(selectedIcon) => handleChange("icon", selectedIcon)}
             />
-
-            <div className="mb-4">
-                <p className="text-xs text-gray-500 mb-2">Quick Categories</p>
-                <div className="flex flex-wrap gap-2">
-                    {EXPENSE_CATEGORIES.map((item) => (
-                        <button
-                            key={item}
-                            type="button"
-                            disabled={isSubmitting}
-                            onClick={() => handleChange("category", item)}
-                            className={`text-xs px-3 py-1 rounded-full border cursor-pointer transition-colors ${
-                                expense.category.toLowerCase() === item.toLowerCase()
-                                    ? "bg-primary text-white border-primary"
-                                    : "bg-gray-50 text-gray-700 border-gray-200 hover:bg-purple-50"
-                            }`}
-                        >
-                            {item}
-                        </button>
-                    ))}
-                </div>
-            </div>
 
             <Input
                 value={expense.category}

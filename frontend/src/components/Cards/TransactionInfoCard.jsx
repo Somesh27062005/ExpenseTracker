@@ -110,19 +110,10 @@ const TransactionInfoCard = ({
                         </button>
                     )}
 
-                    <div className={`flex items-center gap-2 px-3 py-1.5 rounded-md ${getAmountStyles()}`}>
+                    <div className={`flex items-center px-3 py-1.5 rounded-md ${getAmountStyles()}`}>
                         <h6 className="text-xs font-medium whitespace-nowrap">
                             {isIncome ? "+" : "-"} {formatCurrency(amount, user?.currency)}
                         </h6>
-                        <span
-                            className={`text-[10px] font-medium px-1.5 py-0.5 rounded whitespace-nowrap ${
-                                isIncome
-                                    ? "bg-green-100/80 text-green-700"
-                                    : "bg-red-100/80 text-red-600"
-                            }`}
-                        >
-                            {isIncome ? "Income" : "Expense"}
-                        </span>
                     </div>
                 </div>
             </div>
